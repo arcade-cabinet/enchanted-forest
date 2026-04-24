@@ -401,7 +401,7 @@ export function GameUI({
                 style={{ clipPath: "polygon(0 0, 100% 0, 95% 100%, 5% 100%)" }}
               >
                 <div className="text-amber-400/80 text-xs font-bold tracking-widest">
-                  WAVE ウェーブ
+                  WAVE
                 </div>
                 <div className="flex items-baseline gap-1">
                   <span className="text-4xl font-black text-amber-400">{wave}</span>
@@ -480,7 +480,7 @@ export function GameUI({
                 style={{ clipPath: "polygon(5% 0, 100% 0, 100% 100%, 0% 100%)" }}
               >
                 <div className="text-violet-400/80 text-xs font-bold tracking-widest text-right">
-                  MANA マナ
+                  MANA
                 </div>
                 <div className="w-36 h-4 bg-black/50 rounded-sm overflow-hidden mt-1 border border-violet-500/30">
                   <motion.div
@@ -495,6 +495,43 @@ export function GameUI({
             </motion.div>
           </div>
         </div>
+      )}
+
+      {gameState === "tutorial" && (
+        <motion.div
+          key="tutorial-overlay"
+          className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <div className="text-center px-6 py-8 max-w-md">
+            <div className="text-emerald-100/70 text-[10px] font-black tracking-[0.3em] uppercase mb-3">
+              The grove is still
+            </div>
+            <div className="text-amber-300 text-3xl md:text-4xl font-black tracking-wide mb-2"
+              style={{ fontFamily: "Cormorant Garamond, Cinzel, serif", textShadow: "0 0 24px rgba(251, 191, 36, 0.5)" }}
+            >
+              Draw a circle anywhere
+            </div>
+            <div className="text-emerald-200/60 text-sm font-medium">
+              to cast SHIELD. The first rune calls the waves.
+            </div>
+            <motion.div
+              className="mt-6 mx-auto border-2 border-emerald-300/60 rounded-full"
+              style={{ width: 120, height: 120, boxShadow: "0 0 40px rgba(74, 222, 128, 0.4)" }}
+              animate={{
+                rotate: [0, 360],
+                scale: [1, 1.05, 1],
+              }}
+              transition={{
+                rotate: { duration: 3, repeat: Infinity, ease: "linear" },
+                scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+              }}
+            />
+          </div>
+        </motion.div>
       )}
 
       {(gameState === "playing" || gameState === "tutorial") && (
@@ -552,7 +589,7 @@ export function GameUI({
         </motion.div>
       )}
 
-      {gameState === "victory" && <DramaticFlash text="勝利" subtext="VICTORY" color="#fbbf24" />}
+      {gameState === "victory" && <DramaticFlash text="SEALED" subtext="The grove is whole" color="#fbbf24" />}
       {gameState === "victory" && (
         <button
           type="button"
@@ -564,7 +601,7 @@ export function GameUI({
       )}
       {gameState === "defeat" && (
         <>
-          <DramaticFlash text="敗北" subtext="DEFEAT" color="#ef4444" />
+          <DramaticFlash text="FALLEN" subtext="The roots have gone dark" color="#ef4444" />
           <button
             type="button"
             className="fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 rounded-lg border border-red-300/40 bg-red-900/80 px-8 py-3 text-white font-black"

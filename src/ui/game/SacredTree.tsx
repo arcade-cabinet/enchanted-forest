@@ -48,7 +48,7 @@ export function SacredTree({
   const controls = useAnimationControls();
   const ritualColor = ritualRune ? RITUAL_COLORS[ritualRune] : "#fbbf24";
 
-  const treeNames = ["神木・壱", "神木・弐", "神木・参"];
+  const treeNames = ["First Elder", "Heart Tree", "Third Elder"];
 
   useEffect(() => {
     if (health < prevHealthRef.current) {
