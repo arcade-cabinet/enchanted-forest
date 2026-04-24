@@ -7,7 +7,7 @@ domain: context
 
 # State
 
-## 2026-04-24 update
+## 2026-04-24 Production Polish Milestone Complete
 
 Since the 2026-04-23 baseline:
 
@@ -16,6 +16,12 @@ Since the 2026-04-23 baseline:
 - **PR #21** — memory-spike perf patches (NoiseBackground ImageData
   reuse + sin LUT, CorruptionWave intervals stabilized, Tone
   cleanup on unmount+restart, tutorial double-spawn race fixed)
+- **Production Polish (Current)**
+  - Priority 1: SVG graphics implemented for Sacred Trees, Spirit (firefly), and CorruptionWave (moth/wisp).
+  - Priority 2: E2E journey harness (`e2e/journey.spec.ts`) implemented with multi-viewport and Playwright parity.
+  - Priority 3: Audio context unlocks on START. ToneDrawer floating label removed to prevent duplication with RUNE CUE panel.
+  - Priority 4: Perf leaks patched in `SacredTree` (timeout teardown) and `FireflyParticles` (radial gradient caching).
+  - Added New Game Configuration modal to display the `adjective-adjective-noun` seed codename and allow rerolling before starting.
 
 Net effect: landing is its own screen (no playfield bleed), the
 player gets a tutorial phase to cast their first rune before waves

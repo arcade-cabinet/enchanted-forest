@@ -76,6 +76,7 @@ export interface ForestSpellCadenceCue {
 }
 
 export interface ForestState {
+  seed: number;
   phase: ForestPhase;
   sessionMode: SessionMode;
   elapsedMs: number;
@@ -93,6 +94,7 @@ export interface ForestState {
   healingTreeIndex: number | null;
   objective: string;
   threatLevel: number;
+  runesCast: Record<RuneType, number>;
 }
 
 export interface SpawnWaveResult {

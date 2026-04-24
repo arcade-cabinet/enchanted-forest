@@ -8,33 +8,37 @@ import type {
   TreePosition,
 } from "@/sim/grove/types";
 import { clamp, round, updateThreat } from "@/sim/grove/utils";
+import { createRng, hashSeed } from "@/sim/rng";
 
 /**
  * Spawn a fresh wave of corruption shadows targeting the three
  * trees. Deterministic for a given (wave, startingShadowId, mode).
  */
 export function spawnCorruptionWave(
+  state: ForestState,
   wave: number,
   startingShadowId = 0,
   mode: string | null | undefined = "standard"
 ): SpawnWaveResult {
   const tuning = getForestModeTuning(mode);
   const count = wave * 3;
+  const rng = createRng(hashSeed(state.seed, wave, 0x1002));
   const shadows = Array.from({ length: count }, (_, index): CorruptionShadow => {
-    const targetTreeIndex = (index + wave) % TREE_POSITIONS.length;
+    // Determine target via RNG instead of modulo
+    const targetTreeIndex = rng.int(0, TREE_POSITIONS.length - 1);
     const target = TREE_POSITIONS[targetTreeIndex];
-    const columnOffset = ((index % 3) - 1) * (7 + wave * 0.7);
+    const columnOffset = rng.range(-15, 15);
     const row = Math.floor(index / 3);
 
     return {
       id: startingShadowId + index,
-      x: clamp(target.x + columnOffset + wave * 1.3, 8, 92),
+      x: clamp(target.x + columnOffset, 8, 92),
       y: -12 - row * 7 - wave * 2,
       targetTreeIndex,
       health: 20 + wave * 2,
       maxHealth: 20 + wave * 2,
-      speed: round((0.5 + wave * 0.065 + (index % 2) * 0.04) * tuning.shadowSpeedScale, 3),
-      size: 30 + ((wave * 7 + index * 5) % 18),
+      speed: round(rng.range(0.5, 0.6) * tuning.shadowSpeedScale + wave * 0.05, 3),
+      size: rng.int(30, 48),
     };
   });
 

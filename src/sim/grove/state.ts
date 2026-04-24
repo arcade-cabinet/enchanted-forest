@@ -1,12 +1,15 @@
 import { normalizeSessionMode } from "@/lib/sessionMode";
+import { randomSeed } from "@/sim/rng";
 import { DEFAULT_OBJECTIVE, TREE_POSITIONS } from "./constants";
 import type { ForestPhase, ForestState, GroveTreeState } from "./types";
 
 export function createInitialForestState(
   phase: ForestPhase = "intro",
-  mode: string | null | undefined = "standard"
+  mode: string | null | undefined = "standard",
+  seed?: number
 ): ForestState {
   return {
+    seed: seed ?? randomSeed(),
     elapsedMs: 0,
     phase,
     sessionMode: normalizeSessionMode(mode),
@@ -24,6 +27,7 @@ export function createInitialForestState(
     healingTreeIndex: null,
     objective: DEFAULT_OBJECTIVE,
     threatLevel: 0,
+    runesCast: { shield: 0, heal: 0, purify: 0 },
   };
 }
 

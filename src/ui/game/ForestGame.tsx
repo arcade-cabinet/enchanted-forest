@@ -34,6 +34,7 @@ import { forestAudio } from "@/lib/forestAudio";
 import type { RunePattern } from "@/lib/runePatterns";
 import type { GameSaveSlot, SessionMode } from "@/lib/sessionMode";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { seedFromCodename } from "@/sim/rng";
 import { CorruptionWave } from "./CorruptionWave";
 import { FireflyParticles } from "./FireflyParticles";
 import { GameUI } from "./GameUI";
@@ -43,8 +44,21 @@ import { SacredTree } from "./SacredTree";
 import { Spirit } from "./Spirit";
 import { ToneDrawer } from "./ToneDrawer";
 
+function parseSeedParam(val: string | null): number | undefined {
+  if (!val) return undefined;
+  if (val === "fast-wave") return 1337;
+  const cn = seedFromCodename(val);
+  if (cn !== null) return cn;
+  const num = parseInt(val, 10);
+  if (!isNaN(num)) return num;
+  return undefined;
+}
+
 export function ForestGame() {
-  const [forestState, setForestState] = useState(createInitialForestState);
+  const [forestState, setForestState] = useState(() => {
+    const seedParam = new URLSearchParams(window.location.search).get("seed");
+    return createInitialForestState("intro", "standard", parseSeedParam(seedParam));
+  });
   const [audioStatus, setAudioStatus] = useState<ForestAudioStatus>(forestAudio.getStatus());
   const [isDrawing, setIsDrawing] = useState(false);
   const [spiritPos, setSpiritPos] = useState({ x: 0, y: 0 });
@@ -61,21 +75,35 @@ export function ForestGame() {
 
   const spawnWave = useCallback(
     (waveNum: number, mode: SessionMode = forestState.sessionMode) => {
-      const wave = spawnCorruptionWave(waveNum, shadowIdRef.current, mode);
-      shadowIdRef.current = wave.nextShadowId;
+      const waveData = spawnCorruptionWave(forestState, waveNum, shadowIdRef.current, mode);
+      shadowIdRef.current = waveData.nextShadowId;
       forestAudio.playWaveStart(waveNum);
       setForestState((prev) => ({
         ...prev,
         wave: waveNum,
-        shadows: wave.shadows,
+        shadows: waveData.shadows,
         objective: `Wave ${waveNum} is entering the ward line. Draw before it reaches the roots.`,
-        threatLevel: Math.min(100, wave.shadows.length * 7),
+        threatLevel: Math.min(100, waveData.shadows.length * 7),
       }));
     },
-    [forestState.sessionMode]
+    [forestState.sessionMode, forestState.seed]
   );
 
+  useEffect(() => {
+    // Cheat code for e2e testing
+    (window as any).__EF_CHEAT_VICTORY = () => {
+      setForestState((prev) => ({ ...prev, phase: "victory", objective: "The grove is sealed." }));
+    };
+    return () => {
+      delete (window as any).__EF_CHEAT_VICTORY;
+    };
+  }, []);
+
   const startGame = async (mode: SessionMode, saveSlot?: GameSaveSlot) => {
+    // Unlock the AudioContext synchronously in the same frame as the user
+    // click so Chrome doesn't log an autoplay warning during the async gap
+    // before Tone.start() resolves.
+    forestAudio.unlock();
     const status = await forestAudio.initialize();
     setAudioStatus(status);
     forestAudio.startAmbient();
@@ -92,10 +120,10 @@ export function ForestGame() {
     // hostile "shadows already descending the instant you click
     // START" experience.
     shadowIdRef.current = 0;
-    setForestState({
-      ...createInitialForestState("tutorial", mode),
+    setForestState((prev) => ({
+      ...createInitialForestState("tutorial", mode, prev.seed),
       objective: "Draw a circle anywhere to cast SHIELD.",
-    });
+    }));
   };
 
   // Promote tutorial → playing on first successful cast, then
@@ -110,26 +138,26 @@ export function ForestGame() {
     // Small delay so the tutorial-overlay fade has time to run
     // before the first wave arrives.
     const timeout = setTimeout(() => {
-      const wave = spawnCorruptionWave(1, 0, forestState.sessionMode);
-      shadowIdRef.current = wave.nextShadowId;
+      const waveData = spawnCorruptionWave(forestState, 1, 0, forestState.sessionMode);
+      shadowIdRef.current = waveData.nextShadowId;
       forestAudio.playWaveStart(1);
       setForestState((prev) => ({
         ...prev,
         phase: "playing",
         wave: 1,
-        shadows: wave.shadows,
-        threatLevel: wave.shadows.length * 7,
+        shadows: waveData.shadows,
+        threatLevel: waveData.shadows.length * 7,
         objective: "Corruption arrives. Read the cadence; defend the trees.",
       }));
     }, 700);
     return () => clearTimeout(timeout);
-  }, [forestState.phase, forestState.lastRuneType, forestState.sessionMode]);
+  }, [forestState.phase, forestState.lastRuneType, forestState.sessionMode, forestState.seed]);
 
   const restartGame = () => {
     forestAudio.stopAmbient();
     clearSpellTimeouts();
     shadowIdRef.current = 0;
-    setForestState(createInitialForestState());
+    setForestState((prev) => createInitialForestState("intro", "standard", prev.seed));
   };
 
   // Stop the ambient Tone pad and cancel any pending spell cleanup
@@ -253,7 +281,11 @@ export function ForestGame() {
       />
       {showPlayfield && (
         <>
-          <GroveStage ritualCue={ritualCue} threatLevel={forestState.threatLevel} />
+          <GroveStage
+            ritualCue={ritualCue}
+            threatLevel={forestState.threatLevel}
+            showCueLabel={forestState.phase === "playing"}
+          />
           <NoiseBackground />
           <FireflyParticles count={40} />
 
@@ -272,15 +304,17 @@ export function ForestGame() {
             />
           ))}
 
-          <CorruptionWave
-            shadows={forestState.shadows}
-            shadowIntents={forestState.shadows.map(getShadowIntentPath)}
-            treePositions={TREE_POSITIONS}
-            onShadowReachTree={handleShadowReach}
-            onShadowPurified={handleShadowPurified}
-            isPurifying={!!forestState.purifyZone}
-            purifyZone={forestState.purifyZone}
-          />
+          <div data-testid="corruption-wave" className="absolute inset-0 pointer-events-none">
+            <CorruptionWave
+              shadows={forestState.shadows}
+              shadowIntents={forestState.shadows.map(getShadowIntentPath)}
+              treePositions={TREE_POSITIONS}
+              onShadowReachTree={handleShadowReach}
+              onShadowPurified={handleShadowPurified}
+              isPurifying={!!forestState.purifyZone}
+              purifyZone={forestState.purifyZone}
+            />
+          </div>
 
           <ToneDrawer
             onSpellCast={handleSpellCast}

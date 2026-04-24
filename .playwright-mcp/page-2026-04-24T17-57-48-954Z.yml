@@ -1,0 +1,59 @@
+- generic [ref=e3]:
+  - generic:
+    - img
+    - generic: Draw shield
+  - generic [ref=e14]:
+    - img [ref=e16]
+    - generic [ref=e47]: "100"
+    - generic [ref=e48]: First Elder
+  - generic [ref=e49]:
+    - generic:
+      - img
+    - img [ref=e51]
+    - generic [ref=e82]: "100"
+    - generic [ref=e83]: Heart Tree
+  - generic [ref=e84]:
+    - img [ref=e86]
+    - generic [ref=e117]: "100"
+    - generic [ref=e118]: Third Elder
+  - img
+  - generic:
+    - generic:
+      - img
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic: WAVE
+          - generic:
+            - generic: "1"
+            - generic: / 8
+      - generic:
+        - generic:
+          - generic: GROVE CHORUS
+          - generic:
+            - generic: Rune Cue
+            - generic: Draw Shield
+            - generic: heart tree
+          - generic: Shield heart tree while the path is readable.
+          - generic:
+            - generic: Harmony
+            - generic: 0/3
+          - generic: Alternate rune types to build harmony
+          - generic:
+            - generic:
+              - generic: Listening Grove
+              - generic: Audio live
+            - generic:
+              - generic: listen
+              - generic: draw
+              - generic: answer
+      - generic:
+        - generic:
+          - generic: MANA
+  - generic:
+    - generic:
+      - generic: The grove is still
+      - generic: Draw a circle anywhere
+      - generic: to cast SHIELD. The first rune calls the waves.
+  - button "Mute audio" [ref=e13] [cursor=pointer]: 🔊

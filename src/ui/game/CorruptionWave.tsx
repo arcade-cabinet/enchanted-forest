@@ -14,14 +14,10 @@ const VAPOR_PARTICLES = Array.from({ length: 12 }, (_, index) => ({
   y: Math.sin((index * Math.PI * 2) / 12) * 50,
   delay: index * 0.02,
 }));
-const SHADOW_DROPLETS = Array.from({ length: 3 }, (_, index) => ({
-  id: `shadow-droplet-${index + 1}`,
-  index,
-}));
-const SHADOW_TENDRILS = Array.from({ length: 3 }, (_, index) => ({
-  id: `shadow-tendril-${index + 1}`,
-  index,
-}));
+// Each shadow is bucketed into one of these silhouettes by id — the grove
+// faces a mix of moths (fast, many) and wisps (slower, larger glow) instead
+// of a single generic blob.
+type CorruptionKind = "moth" | "wisp";
 
 export type { CorruptionShadow };
 
@@ -128,6 +124,7 @@ function CorruptionShadowEntity({
   const [position, setPosition] = useState({ x: shadow.x, y: shadow.y });
   const [isVaporizing, setIsVaporizing] = useState(false);
   const hasReachedRef = useRef(false);
+  const reachTimerRef = useRef<number | null>(null);
 
   // Stash frequently-changing props in a ref so the 60Hz interval
   // doesn't tear down and rebind every time health/size/speed/intent
@@ -163,7 +160,6 @@ function CorruptionShadowEntity({
   // Mount the movement interval exactly once per shadow (keyed by
   // shadow.id above via AnimatePresence). All other scalar props
   // are read via refs so this effect never re-subscribes mid-life.
-  // biome-ignore lint/correctness/useExhaustiveDependencies: scalar props intentionally read via refs to prevent interval churn
   useEffect(() => {
     if (isVaporizing) return undefined;
     const interval = setInterval(() => {
@@ -186,14 +182,23 @@ function CorruptionShadowEntity({
         if (next.reached) {
           if (!hasReachedRef.current) {
             hasReachedRef.current = true;
-            window.setTimeout(() => onReachTreeRef.current(), 0);
+            reachTimerRef.current = window.setTimeout(() => {
+              reachTimerRef.current = null;
+              onReachTreeRef.current();
+            }, 0);
           }
           return prev;
         }
         return { x: next.x, y: next.y };
       });
     }, 16);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (reachTimerRef.current !== null) {
+        window.clearTimeout(reachTimerRef.current);
+        reachTimerRef.current = null;
+      }
+    };
   }, [isVaporizing]);
 
   if (isVaporizing) {
@@ -288,116 +293,151 @@ function CorruptionShadowEntity({
           }}
         />
       </motion.div>
-      <motion.div
-        className="relative"
-        animate={{
-          y: [0, -3, 0],
-        }}
-        transition={{
-          duration: 0.8 + (shadow.id % 5) * 0.08,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      >
-        <div
-          className="rounded-full relative overflow-hidden"
-          style={{
-            width: shadow.size,
-            height: shadow.size,
-            background:
-              "radial-gradient(ellipse at 30% 30%, rgba(120, 50, 150, 0.9) 0%, rgba(60, 20, 80, 0.95) 50%, rgba(30, 5, 50, 1) 100%)",
-            boxShadow: `
-              0 0 ${shadow.size / 2}px rgba(100, 40, 120, 0.6),
-              inset 0 -${shadow.size / 4}px ${shadow.size / 3}px rgba(0, 0, 0, 0.5),
-              inset 0 ${shadow.size / 6}px ${shadow.size / 4}px rgba(150, 80, 180, 0.3)
-            `,
-          }}
-        >
-          <div
-            className="absolute w-2 h-2 rounded-full bg-purple-300/50"
-            style={{
-              top: shadow.size * 0.15,
-              left: shadow.size * 0.25,
-            }}
-          />
-        </div>
-        <div
-          className="absolute flex gap-1"
-          style={{
-            left: shadow.size * 0.18,
-            top: shadow.size * 0.22,
-          }}
-        >
-          <motion.div
-            className="relative"
-            animate={{ scaleY: [1, 0.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-          >
-            <div
-              className="w-2 h-2.5 bg-red-500 rounded-full"
-              style={{
-                boxShadow: "0 0 8px rgba(239, 68, 68, 0.9)",
-              }}
-            />
-            <div className="absolute w-1 h-1 bg-white rounded-full top-0.5 left-0.5 opacity-60" />
-          </motion.div>
-          <motion.div
-            className="relative"
-            animate={{ scaleY: [1, 0.2, 1] }}
-            transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, delay: 0.1 }}
-          >
-            <div
-              className="w-2 h-2.5 bg-red-500 rounded-full"
-              style={{
-                boxShadow: "0 0 8px rgba(239, 68, 68, 0.9)",
-              }}
-            />
-            <div className="absolute w-1 h-1 bg-white rounded-full top-0.5 left-0.5 opacity-60" />
-          </motion.div>
-        </div>
-        {SHADOW_DROPLETS.map(({ id, index }) => (
-          <motion.div
-            key={id}
-            className="absolute w-1.5 h-1.5 rounded-full bg-purple-800"
-            style={{
-              left: shadow.size * 0.3 + index * 8,
-              bottom: -5,
-            }}
-            animate={{
-              y: [-5, -15, -5],
-              opacity: [0.3, 0.7, 0.3],
-              scale: [1, 0.8, 1],
-            }}
-            transition={{
-              duration: 1 + index * 0.3,
-              repeat: Infinity,
-              delay: index * 0.2,
-            }}
-          />
-        ))}
-        {SHADOW_TENDRILS.map(({ id, index }) => (
-          <motion.div
-            key={id}
-            className="absolute bg-gradient-to-t from-purple-900/80 to-transparent rounded-full"
-            style={{
-              width: 4,
-              height: shadow.size * 0.5,
-              left: shadow.size * 0.3 + index * (shadow.size * 0.2),
-              top: shadow.size * -0.3,
-              transformOrigin: "bottom center",
-            }}
-            animate={{
-              rotate: [-10 + index * 10, 10 + index * 10, -10 + index * 10],
-              scaleY: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 1.2 + index * 0.2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
-        ))}
-      </motion.div>
+      <CorruptionCreature shadow={shadow} />
     </motion.div>
+  );
+}
+
+function getKindFor(id: number): CorruptionKind {
+  return id % 3 === 0 ? "wisp" : "moth";
+}
+
+function CorruptionCreature({ shadow }: { shadow: CorruptionShadow }) {
+  const kind = getKindFor(shadow.id);
+  const bob = 0.8 + (shadow.id % 5) * 0.08;
+
+  return (
+    <motion.div
+      className="relative"
+      style={{ width: shadow.size, height: shadow.size }}
+      animate={{ y: [0, -3, 0] }}
+      transition={{ duration: bob, repeat: Infinity, ease: "easeInOut" }}
+    >
+      {kind === "moth" ? <MothSilhouette size={shadow.size} /> : <WispSilhouette size={shadow.size} />}
+    </motion.div>
+  );
+}
+
+function MothSilhouette({ size }: { size: number }) {
+  return (
+    <svg
+      viewBox="0 0 40 40"
+      width={size}
+      height={size}
+      aria-hidden="true"
+      style={{
+        filter: "drop-shadow(0 0 6px rgba(120, 80, 170, 0.55))",
+        transform: "translate(-50%, -50%)",
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+      }}
+    >
+      <defs>
+        <radialGradient id="moth-wing" cx="50%" cy="55%" r="60%">
+          <stop offset="0%" stopColor="rgba(110, 70, 140, 0.85)" />
+          <stop offset="65%" stopColor="rgba(60, 30, 90, 0.9)" />
+          <stop offset="100%" stopColor="rgba(20, 6, 40, 0.95)" />
+        </radialGradient>
+      </defs>
+      {/* Antennae */}
+      <path
+        d="M 18 12 Q 14 6 10 6"
+        stroke="#1a0a2a"
+        strokeWidth="0.8"
+        fill="none"
+        strokeLinecap="round"
+      />
+      <path
+        d="M 22 12 Q 26 6 30 6"
+        stroke="#1a0a2a"
+        strokeWidth="0.8"
+        fill="none"
+        strokeLinecap="round"
+      />
+      {/* Left wing (upper + lower lobe) */}
+      <motion.g
+        animate={{ scaleX: [0.9, 1.05, 0.9] }}
+        transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformOrigin: "20px 22px" }}
+      >
+        <path
+          d="M 20 18 Q 6 14 2 22 Q 4 30 20 26 Z"
+          fill="url(#moth-wing)"
+        />
+        <path d="M 20 22 Q 10 26 8 32 Q 16 32 20 28 Z" fill="rgba(40, 16, 70, 0.9)" />
+      </motion.g>
+      {/* Right wing */}
+      <motion.g
+        animate={{ scaleX: [0.9, 1.05, 0.9] }}
+        transition={{ duration: 0.6, repeat: Infinity, ease: "easeInOut", delay: 0.05 }}
+        style={{ transformOrigin: "20px 22px" }}
+      >
+        <path d="M 20 18 Q 34 14 38 22 Q 36 30 20 26 Z" fill="url(#moth-wing)" />
+        <path d="M 20 22 Q 30 26 32 32 Q 24 32 20 28 Z" fill="rgba(40, 16, 70, 0.9)" />
+      </motion.g>
+      {/* Body */}
+      <ellipse cx="20" cy="22" rx="1.6" ry="6" fill="#0e0418" />
+      {/* Eyes — two red points, menace without gore */}
+      <circle cx="18.5" cy="13" r="0.9" fill="#ef4444" />
+      <circle cx="21.5" cy="13" r="0.9" fill="#ef4444" />
+    </svg>
+  );
+}
+
+function WispSilhouette({ size }: { size: number }) {
+  return (
+    <svg
+      viewBox="0 0 40 40"
+      width={size * 1.05}
+      height={size * 1.05}
+      aria-hidden="true"
+      style={{
+        filter: "drop-shadow(0 0 10px rgba(130, 80, 180, 0.7))",
+        transform: "translate(-50%, -50%)",
+        position: "absolute",
+        left: "50%",
+        top: "50%",
+      }}
+    >
+      <defs>
+        <radialGradient id="wisp-core" cx="50%" cy="45%" r="55%">
+          <stop offset="0%" stopColor="rgba(160, 100, 200, 0.85)" />
+          <stop offset="70%" stopColor="rgba(70, 30, 110, 0.8)" />
+          <stop offset="100%" stopColor="rgba(20, 5, 40, 0.95)" />
+        </radialGradient>
+      </defs>
+      {/* Outer halo */}
+      <motion.circle
+        cx="20"
+        cy="22"
+        r="16"
+        fill="rgba(120, 70, 180, 0.18)"
+        animate={{ r: [15, 17, 15], opacity: [0.12, 0.28, 0.12] }}
+        transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+      />
+      {/* Trailing tendrils — wavering from below */}
+      <motion.path
+        d="M 13 28 Q 12 34 10 38 M 20 30 Q 20 36 18 40 M 27 28 Q 28 34 30 38"
+        stroke="rgba(90, 50, 140, 0.85)"
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        fill="none"
+        animate={{ opacity: [0.6, 0.9, 0.6], pathLength: [0.7, 1, 0.7] }}
+        transition={{ duration: 1.1, repeat: Infinity, ease: "easeInOut" }}
+      />
+      {/* Core orb */}
+      <circle cx="20" cy="20" r="9" fill="url(#wisp-core)" />
+      {/* Single eye slit */}
+      <motion.path
+        d="M 15 19 Q 20 17 25 19"
+        stroke="#f2c14e"
+        strokeWidth="1"
+        fill="none"
+        strokeLinecap="round"
+        animate={{ opacity: [0.75, 1, 0.75] }}
+        transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+      />
+    </svg>
   );
 }

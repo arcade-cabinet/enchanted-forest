@@ -9,6 +9,7 @@ import { RUNE_PATTERNS } from "@/lib/runePatterns";
 import type { GameSaveSlot, SessionMode } from "@/lib/sessionMode";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { codenameFromSeed, randomSeed } from "@/sim/rng";
 
 const RADIAL_SPEED_LINES = Array.from({ length: 24 }, (_, index) => ({
   id: `radial-speed-line-${index + 1}`,
@@ -40,7 +41,7 @@ interface GameUIProps {
   maxMana: number;
   isPaused: boolean;
   gameState: "intro" | "tutorial" | "playing" | "victory" | "defeat";
-  onStart: (mode: SessionMode, saveSlot?: GameSaveSlot) => void;
+  onStart: (mode: SessionMode, saveSlot?: GameSaveSlot, seed?: number) => void;
   onRestart: () => void;
   lastRune?: string | null;
   objective: string;
@@ -365,6 +366,8 @@ export function GameUI({
   runSummary,
 }: GameUIProps) {
   const [showRuneEffect, setShowRuneEffect] = useState<(typeof RUNE_PATTERNS)[0] | null>(null);
+  const [showNewGameModal, setShowNewGameModal] = useState(false);
+  const [pendingSeed, setPendingSeed] = useState<number>(0);
 
   useEffect(() => {
     if (lastRune) {
@@ -389,7 +392,7 @@ export function GameUI({
       </AnimatePresence>
 
       {(gameState === "playing" || gameState === "tutorial") && (
-        <div className="fixed inset-x-0 top-0 z-40 p-3 md:p-4 pointer-events-none">
+        <div data-testid="hud" className="fixed inset-x-0 top-0 z-40 p-3 md:p-4 pointer-events-none">
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-3 md:gap-4 items-start max-w-5xl mx-auto">
             <motion.div
               className="relative"
@@ -500,6 +503,7 @@ export function GameUI({
       {gameState === "tutorial" && (
         <motion.div
           key="tutorial-overlay"
+          data-testid="tutorial-overlay"
           className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -575,7 +579,13 @@ export function GameUI({
           <StartScreen
             title="ENCHANTED FOREST"
             subtitle="Learn a rune, chain it, survive grove variety that tests the reading of your cadence. Finish as a wiser mage."
-            primaryAction={{ label: "START", onClick: () => onStart("standard") }}
+            primaryAction={{
+              label: "START",
+              onClick: () => {
+                setPendingSeed(randomSeed());
+                setShowNewGameModal(true);
+              },
+            }}
             glowColor="var(--color-firefly)"
             glowRgb="242, 193, 78"
             displayClassName="ef-display"
@@ -586,18 +596,106 @@ export function GameUI({
             ]}
             renderHero={() => <LandingHero />}
           />
+          {showNewGameModal && (
+            <motion.div
+              className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="bg-emerald-950/90 border border-emerald-500/30 p-8 rounded-xl text-center max-w-md w-full shadow-2xl">
+                <h2 className="text-emerald-400 font-black text-xl tracking-widest mb-2 uppercase">
+                  World Seed
+                </h2>
+                <p className="text-emerald-100/70 text-sm mb-6">
+                  Your grove's layout, corruption rhythms, and fate are bound to this codename.
+                </p>
+                <div className="bg-black/50 py-4 px-6 rounded border border-amber-500/20 mb-6">
+                  <div className="text-amber-400 font-bold text-2xl tracking-widest uppercase" style={{ fontFamily: "Cormorant Garamond, Cinzel, serif" }}>
+                    {codenameFromSeed(pendingSeed)}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <button
+                    type="button"
+                    className="w-full rounded border border-amber-500 bg-amber-500/20 px-4 py-3 text-amber-100 font-black tracking-widest hover:bg-amber-500/30 transition-colors uppercase"
+                    onClick={() => {
+                      setShowNewGameModal(false);
+                      onStart("standard", undefined, pendingSeed);
+                    }}
+                  >
+                    Begin Journey
+                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      className="flex-1 rounded border border-emerald-500/30 bg-emerald-900/50 px-4 py-2 text-emerald-200 font-bold hover:bg-emerald-800/50 transition-colors uppercase text-sm"
+                      onClick={() => setPendingSeed(randomSeed())}
+                    >
+                      Reroll Seed
+                    </button>
+                    <button
+                      type="button"
+                      className="flex-1 rounded border border-emerald-500/30 bg-transparent px-4 py-2 text-emerald-200/60 font-bold hover:bg-emerald-900/30 hover:text-emerald-200 transition-colors uppercase text-sm"
+                      onClick={() => setShowNewGameModal(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       )}
 
       {gameState === "victory" && <DramaticFlash text="SEALED" subtext="The grove is whole" color="#fbbf24" />}
       {gameState === "victory" && (
-        <button
-          type="button"
-          className="fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 rounded-lg border border-amber-300/40 bg-amber-900/80 px-8 py-3 text-white font-black"
-          onClick={onRestart}
+        <motion.div
+          className="fixed inset-0 z-[55] flex flex-col items-center justify-center pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 1 }}
         >
-          SEALED {runSummary.totalWaves} WAVES / RESTART
-        </button>
+          <div className="bg-emerald-950/90 backdrop-blur-md border border-amber-500/30 p-8 rounded-xl text-center max-w-lg mt-32 shadow-2xl pointer-events-auto">
+            <h2 className="text-amber-400 font-black text-3xl tracking-widest mb-2" style={{ fontFamily: "Cormorant Garamond, Cinzel, serif" }}>VICTORY DIARY</h2>
+            <div className="text-emerald-200/70 text-sm tracking-[0.2em] mb-8 uppercase">The Grove is Whole</div>
+            
+            <div className="grid grid-cols-3 gap-6 mb-8 text-left">
+              <div className="flex flex-col items-center bg-black/40 rounded p-4 border border-emerald-500/20">
+                <span className="text-emerald-400 text-3xl font-black mb-1">{runSummary.runesCast?.shield ?? 0}</span>
+                <span className="text-emerald-100/60 text-xs tracking-widest uppercase">Shields</span>
+              </div>
+              <div className="flex flex-col items-center bg-black/40 rounded p-4 border border-purple-500/20">
+                <span className="text-purple-400 text-3xl font-black mb-1">{runSummary.runesCast?.heal ?? 0}</span>
+                <span className="text-emerald-100/60 text-xs tracking-widest uppercase">Heals</span>
+              </div>
+              <div className="flex flex-col items-center bg-black/40 rounded p-4 border border-amber-500/20">
+                <span className="text-amber-400 text-3xl font-black mb-1">{runSummary.runesCast?.purify ?? 0}</span>
+                <span className="text-emerald-100/60 text-xs tracking-widest uppercase">Purifies</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center bg-black/50 px-6 py-4 rounded mb-8 border border-white/5">
+              <div className="text-left">
+                <div className="text-emerald-100/60 text-[10px] tracking-widest uppercase mb-1">Time Survived</div>
+                <div className="text-emerald-200 font-bold text-xl">{Math.floor((runSummary.elapsedSeconds ?? 0) / 60)}:{(runSummary.elapsedSeconds % 60).toString().padStart(2, "0")}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-emerald-100/60 text-[10px] tracking-widest uppercase mb-1">Max Harmony</div>
+                <div className="text-amber-300 font-bold text-xl">{runSummary.harmonyLevel} surges</div>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              className="w-full rounded border border-amber-400 bg-amber-500/20 px-8 py-4 text-amber-100 font-black tracking-widest hover:bg-amber-500/30 transition-colors uppercase"
+              onClick={onRestart}
+            >
+              Seal {runSummary.totalWaves} Waves / Restart
+            </button>
+          </div>
+        </motion.div>
       )}
       {gameState === "defeat" && (
         <>
