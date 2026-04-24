@@ -1,4 +1,4 @@
-import { GameViewport } from "@/ui/shell";
+import { GameViewport, MuteToggle } from "@/ui/shell";
 import { isRuntimePaused } from "@/lib/runtimePause";
 import { useRunSnapshotAutosave } from "@/hooks/useRunSnapshotAutosave";
 import { recordRunResult } from "@/hooks/runtimeResult";
@@ -235,6 +235,7 @@ export function ForestGame() {
         audioStatus={audioStatus}
         runSummary={runSummary}
       />
+      <MuteToggle />
     </GameViewport>
   );
 }

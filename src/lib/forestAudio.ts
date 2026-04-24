@@ -14,9 +14,13 @@ export interface ForestAudioStatus {
   visualFallbackActive: boolean;
 }
 
+const MASTER_DB_UNMUTED = -6;
+const MASTER_DB_MUTED = -Infinity;
+
 class ForestAudioEngine {
   private initialized = false;
   private fallbackReason: string | null = null;
+  private muted = false;
   private masterVolume: Tone.Volume | null = null;
   private ambientDrone: Tone.Synth | null = null;
   private ambientFilter: Tone.Filter | null = null;
@@ -36,7 +40,9 @@ class ForestAudioEngine {
 
     try {
       await Tone.start();
-      this.masterVolume = new Tone.Volume(-6).toDestination();
+      this.masterVolume = new Tone.Volume(
+        this.muted ? MASTER_DB_MUTED : MASTER_DB_UNMUTED
+      ).toDestination();
       this.mainReverb = new Tone.Reverb({ decay: 4, wet: 0.5, preDelay: 0.1 }).connect(
         this.masterVolume
       );
@@ -217,6 +223,23 @@ class ForestAudioEngine {
   playCorruptionThreat(): void {
     if (!this.initialized) return;
     this.padSynth?.triggerAttackRelease(["C2", "Gb2"], "4n", Tone.now(), 0.3);
+  }
+
+  setMuted(next: boolean): void {
+    this.muted = next;
+    if (this.masterVolume) {
+      // Ramp to the new level so switching doesn't pop. A 200ms
+      // cross-fade is long enough to be smooth, short enough to feel
+      // immediate when the user taps.
+      this.masterVolume.volume.rampTo(
+        next ? MASTER_DB_MUTED : MASTER_DB_UNMUTED,
+        0.2
+      );
+    }
+  }
+
+  isMuted(): boolean {
+    return this.muted;
   }
 
   dispose(): void {

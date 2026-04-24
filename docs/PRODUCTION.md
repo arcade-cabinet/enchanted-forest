@@ -52,12 +52,16 @@ sequence is different from bioluminescent-sea's and cosmic-gardener's.
       `renderHero` slot to support the canvas. Existing verb chips
       ("Draw a rune / Chain its cadence / Seal the grove") stayed.
       Codename + procedural blurb are the follow-up.
-- [ ] **PR E — Audio consolidation.** Tone.js ambient pad with
-      grove-specific chord voicings; pentatonic rune notes already
-      present get gathered into a single audio module with master
-      mute + localStorage persistence + `prefers-reduced-motion`
-      honoring. SFX for rune cast, chain break, corruption hit, wave
-      sealed, tree fallen.
+- [x] **PR E — Audio consolidation.** Audio already lived in a
+      single module (`src/lib/forestAudio.ts`) — the extraction
+      consolidation work — so PR E added the missing controls:
+      `setMuted`/`isMuted` on the engine ramp the master volume,
+      `useAudioMute` persists to `localStorage` under
+      `ef-audio-muted` and defaults to `prefers-reduced-motion`,
+      and a `MuteToggle` component sits bottom-left of the viewport
+      with `aria-pressed` + `aria-label`. Existing pentatonic rune
+      notes, ambient pad, wind noise, and spell-effect synths are
+      untouched.
 - [ ] **PR F — Content pipeline.** Waves + rune patterns authored in
       `config/raw/*.json` and compiled via
       `scripts/compile-content.mjs` (Zod-validated). Runs as
