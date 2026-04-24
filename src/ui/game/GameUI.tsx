@@ -1,4 +1,4 @@
-import { StartScreen } from "@/ui/shell";
+import { LandingHero, StartScreen } from "@/ui/shell";
 import type {
   ForestRitualCue,
   ForestSpellCadenceCue,
@@ -541,17 +541,13 @@ export function GameUI({
             primaryAction={{ label: "START", onClick: () => onStart("standard") }}
             glowColor="var(--color-firefly)"
             glowRgb="242, 193, 78"
-            background={[
-              "radial-gradient(ellipse 80% 60% at center 40%, rgba(26, 58, 34, 0.55), transparent 65%)",
-              "radial-gradient(ellipse 40% 40% at center 60%, rgba(242, 193, 78, 0.10), transparent 70%)",
-              "linear-gradient(180deg, rgba(12, 26, 16, 0.85) 0%, rgba(12, 26, 16, 0.95) 100%)",
-            ].join(", ")}
             displayClassName="ef-display"
             verbs={[
               { icon: "✶", text: "Draw a rune" },
               { icon: "◇", text: "Chain its cadence" },
               { icon: "◈", text: "Seal the grove" },
             ]}
+            renderHero={() => <LandingHero />}
           />
         </motion.div>
       )}
