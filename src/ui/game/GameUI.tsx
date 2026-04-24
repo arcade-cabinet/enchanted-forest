@@ -3,7 +3,7 @@ import type {
   ForestRitualCue,
   ForestSpellCadenceCue,
   RuneType,
-} from "@/engine/forestSimulation";
+} from "@/sim/grove";
 import type { ForestAudioStatus } from "@/lib/forestAudio";
 import { RUNE_PATTERNS } from "@/lib/runePatterns";
 import type { GameSaveSlot, SessionMode } from "@/lib/sessionMode";

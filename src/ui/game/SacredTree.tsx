@@ -1,4 +1,4 @@
-import type { RuneType } from "@/engine/forestSimulation";
+import type { RuneType } from "@/sim/grove";
 import { cn } from "@/lib/utils";
 import { motion, useAnimationControls } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
