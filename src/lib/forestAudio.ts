@@ -160,7 +160,7 @@ class ForestAudioEngine {
     this.melodySynth.triggerAttackRelease(note, "8n", Tone.now(), 0.7);
   }
 
-  playSpellEffect(type: ToneType): void {
+  playSpellEffect(type: ToneType, isSurge = false): void {
     if (!this.initialized) return;
     const now = Tone.now();
     switch (type) {
@@ -197,6 +197,11 @@ class ForestAudioEngine {
         });
         this.padSynth?.triggerAttackRelease(["A2", "E3", "A3"], "1n", now + 1, 0.3);
         break;
+    }
+
+    if (isSurge) {
+      // Huge majestic harmony surge chord
+      this.padSynth?.triggerAttackRelease(["G2", "C3", "G3", "D4", "E4", "G4"], "1n", now, 0.8);
     }
   }
 
