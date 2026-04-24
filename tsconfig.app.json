@@ -19,8 +19,9 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@config/*": ["config/*"]
     }
   },
-  "include": ["src/**/*", "vite-env.d.ts"]
+  "include": ["src/**/*", "config/compiled/**/*.ts", "vite-env.d.ts"]
 }

@@ -82,11 +82,20 @@ sequence is different from bioluminescent-sea's and cosmic-gardener's.
       with `aria-pressed` + `aria-label`. Existing pentatonic rune
       notes, ambient pad, wind noise, and spell-effect synths are
       untouched.
-- [ ] **PR F — Content pipeline.** Waves + rune patterns authored in
-      `config/raw/*.json` and compiled via
-      `scripts/compile-content.mjs` (Zod-validated). Runs as
-      `predev` / `prebuild` / `pretypecheck` / `pretest:*`.
-      Output to `config/compiled/content.ts` (gitignored).
+- [x] **PR F — Content pipeline.** Rune patterns authored
+      one-per-file in `config/raw/runes/*.json` and compiled via
+      `scripts/compile-content.mjs` (Zod-validated; enforces a
+      discriminated-union `templatePoints` shape — either
+      `{ shape: "polyline", points: [...] }` or
+      `{ shape: "circle", segments }` — and deduplicates rune
+      types across files). Pipeline runs as `predev` / `prebuild`
+      / `pretypecheck` / `pretest:{node,dom,browser}`. Output
+      lands at `config/compiled/content.ts` (gitignored).
+      `@config/*` path alias wired into `tsconfig.app.json`,
+      `vite.config.ts`, and all three vitest configs. Waves are
+      still formula-driven (`wave * 3` shadows in
+      `spawnCorruptionWave`); if distinct wave-authoring is ever
+      needed it's a follow-up on the same pipeline.
 - [ ] **PR G — Identity icons.** Favicon, apple-touch, OG image with
       the enchanted-forest identity (three-rune triskelion on a deep
       forest green with warm amber accents). Android icon pack at all
