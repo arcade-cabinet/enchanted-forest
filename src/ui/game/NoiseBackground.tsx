@@ -15,6 +15,21 @@ export function NoiseBackground({ className = "" }: NoiseBackgroundProps) {
     let frameCount = 0;
     let animationId = 0;
     const S = 512;
+    // Allocate the ImageData once and mutate its buffer in place —
+    // createImageData every ~3 frames was allocating ~1MB Uint8ClampedArrays
+    // and hitting ~20MB/s of GC churn.
+    const img = ctx.createImageData(S, S);
+    const d = img.data;
+    // Pre-seed the alpha channel; it never changes, so we skip writing it
+    // inside the hot loop.
+    for (let i = 3; i < d.length; i += 4) d[i] = 10;
+    // Sin LUT: sample the pixel-term of the hash once at init. The expensive
+    // pixel * 12.9898 sin only needs 512*512 = 262144 values, reused forever.
+    const PIXELS = S * S;
+    const pixelSin = new Float32Array(PIXELS);
+    for (let p = 0; p < PIXELS; p++) {
+      pixelSin[p] = Math.sin(p * 12.9898);
+    }
     const resize = () => {
       canvas.width = S;
       canvas.height = S;
@@ -22,16 +37,23 @@ export function NoiseBackground({ className = "" }: NoiseBackgroundProps) {
       canvas.style.height = "100vh";
     };
     const draw = () => {
-      const img = ctx.createImageData(S, S);
-      const d = img.data;
-      for (let i = 0; i < d.length; i += 4) {
-        const pixel = i / 4;
-        const seed = Math.sin(pixel * 12.9898 + frameCount * 0.37) * 43758.5453;
+      // sin(a + b) = sin(a)cos(b) + cos(a)sin(b). We precomputed sin(pixel*k)
+      // as pixelSin[p]; cos(pixel*k) would need its own LUT, but the original
+      // used Math.sin(pixel * 12.9898 + frameCount * 0.37) directly. We keep
+      // the exact same hash by recomputing sin once per pixel — but with the
+      // frame term folded into a small per-frame offset added after the LUT
+      // lookup via Math.sin once per pixel is what we had. To preserve the
+      // original visual while killing 250K sins/frame, we instead rotate the
+      // LUT: offset index by a frame-dependent step, giving a similar noise
+      // character without per-pixel sin.
+      const offset = (frameCount * 947) | 0;
+      for (let p = 0, i = 0; p < PIXELS; p++, i += 4) {
+        const seed = pixelSin[(p + offset) % PIXELS] * 43758.5453;
         const v = (seed - Math.floor(seed)) * 255;
         d[i] = v;
         d[i + 1] = v;
         d[i + 2] = v;
-        d[i + 3] = 10;
+        // d[i + 3] already seeded to 10 at init
       }
       ctx.putImageData(img, 0, 0);
     };

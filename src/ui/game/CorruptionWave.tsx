@@ -129,6 +129,21 @@ function CorruptionShadowEntity({
   const [isVaporizing, setIsVaporizing] = useState(false);
   const hasReachedRef = useRef(false);
 
+  // Stash frequently-changing props in a ref so the 60Hz interval
+  // doesn't tear down and rebind every time health/size/speed/intent
+  // shifts. Without this, each ForestGame render (which also rebuilt
+  // onReachTree identity) re-registered N intervals per frame.
+  const shadowRef = useRef(shadow);
+  shadowRef.current = shadow;
+  const treePositionRef = useRef(treePosition);
+  treePositionRef.current = treePosition;
+  const onReachTreeRef = useRef(onReachTree);
+  onReachTreeRef.current = onReachTree;
+  const onPurifiedRef = useRef(onPurified);
+  onPurifiedRef.current = onPurified;
+  const purifyZoneRef = useRef(purifyZone);
+  purifyZoneRef.current = purifyZone;
+
   useEffect(() => {
     if (isVaporizing) return undefined;
 
@@ -138,35 +153,40 @@ function CorruptionShadowEntity({
       const distance = Math.sqrt(dx * dx + dy * dy);
       if (distance < purifyZone.radius) {
         setIsVaporizing(true);
-        const timer = window.setTimeout(onPurified, 560);
+        const timer = window.setTimeout(() => onPurifiedRef.current(), 560);
         return () => window.clearTimeout(timer);
       }
     }
     return undefined;
-  }, [purifyZone, position, onPurified, isVaporizing]);
+  }, [purifyZone, position, isVaporizing]);
 
+  // Mount the movement interval exactly once per shadow (keyed by
+  // shadow.id above via AnimatePresence). All other scalar props
+  // are read via refs so this effect never re-subscribes mid-life.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: scalar props intentionally read via refs to prevent interval churn
   useEffect(() => {
     if (isVaporizing) return undefined;
     const interval = setInterval(() => {
       if (isRuntimePaused()) return;
       setPosition((prev) => {
+        const current = shadowRef.current;
         const next = advanceShadowPosition(
           {
-            id: shadow.id,
+            id: current.id,
             x: prev.x,
             y: prev.y,
-            targetTreeIndex: shadow.targetTreeIndex,
-            health: shadow.health,
-            maxHealth: shadow.maxHealth,
-            speed: shadow.speed,
-            size: shadow.size,
+            targetTreeIndex: current.targetTreeIndex,
+            health: current.health,
+            maxHealth: current.maxHealth,
+            speed: current.speed,
+            size: current.size,
           },
-          treePosition
+          treePositionRef.current
         );
         if (next.reached) {
           if (!hasReachedRef.current) {
             hasReachedRef.current = true;
-            window.setTimeout(onReachTree, 0);
+            window.setTimeout(() => onReachTreeRef.current(), 0);
           }
           return prev;
         }
@@ -174,17 +194,7 @@ function CorruptionShadowEntity({
       });
     }, 16);
     return () => clearInterval(interval);
-  }, [
-    treePosition,
-    shadow.id,
-    shadow.targetTreeIndex,
-    shadow.health,
-    shadow.maxHealth,
-    shadow.speed,
-    shadow.size,
-    onReachTree,
-    isVaporizing,
-  ]);
+  }, [isVaporizing]);
 
   if (isVaporizing) {
     return (
