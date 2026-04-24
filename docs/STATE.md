@@ -1,11 +1,31 @@
 ---
 title: State
-updated: 2026-04-23
+updated: 2026-04-24
 status: in-progress
 domain: context
 ---
 
 # State
+
+## 2026-04-24 update
+
+Since the 2026-04-23 baseline:
+
+- **PR #20** — landing separation, tutorial phase, real Tailwind,
+  HUD polish
+- **PR #21** — memory-spike perf patches (NoiseBackground ImageData
+  reuse + sin LUT, CorruptionWave intervals stabilized, Tone
+  cleanup on unmount+restart, tutorial double-spawn race fixed)
+
+Net effect: landing is its own screen (no playfield bleed), the
+player gets a tutorial phase to cast their first rune before waves
+arrive, and the game can run a long session without leaking
+ImageData buffers or Tone nodes.
+
+For decisions and reasons, see
+[docs/agentic/decisions-log.md](agentic/decisions-log.md). For the
+next agent's pickup list, see
+[docs/agentic/next-work.md](agentic/next-work.md).
 
 ## Current baseline
 
