@@ -228,9 +228,9 @@ function FireflySpirit({ isDrawing }: { isDrawing: boolean }) {
         <ellipse cx="16" cy="17" rx="2.6" ry="5" fill="#2a1b0e" />
         {/* Abdomen lantern — animated glow */}
         <motion.circle
-          cx="16"
-          cy="20"
-          r="2.2"
+          cx={16}
+          cy={20}
+          r={2.2}
           fill={body}
           animate={{ opacity: [0.7, 1, 0.7], r: isDrawing ? [2.4, 3, 2.4] : [2, 2.5, 2] }}
           transition={{

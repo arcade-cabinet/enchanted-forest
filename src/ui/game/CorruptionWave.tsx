@@ -409,9 +409,9 @@ function WispSilhouette({ size }: { size: number }) {
       </defs>
       {/* Outer halo */}
       <motion.circle
-        cx="20"
-        cy="22"
-        r="16"
+        cx={20}
+        cy={22}
+        r={16}
         fill="rgba(120, 70, 180, 0.18)"
         animate={{ r: [15, 17, 15], opacity: [0.12, 0.28, 0.12] }}
         transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
