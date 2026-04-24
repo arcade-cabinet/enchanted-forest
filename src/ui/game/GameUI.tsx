@@ -58,6 +58,7 @@ interface GameUIProps {
     targetMinutes: number;
     totalWaves: number;
     wave: number;
+    runesCast: Record<string, number>;
   };
 }
 

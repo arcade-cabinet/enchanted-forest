@@ -92,7 +92,7 @@ function ShadowIntentTelegraph({ paths }: { paths: ShadowIntentPath[] }) {
           <motion.circle
             cx={path.targetX}
             cy={path.targetY}
-            r={1.4 + path.alertLevel * 1.4}
+            r={Math.max(1.4, 1.4 + (path.alertLevel || 0) * 1.4)}
             fill="none"
             stroke="rgba(251, 191, 36, 0.55)"
             strokeWidth="0.2"
