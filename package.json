@@ -1,7 +1,7 @@
 {
   "name": "enchanted-forest",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Rune-cadence survival grove — learn a rune, chain it, survive grove variety that tests the reading of your cadence, finish as a wiser mage.",
   "type": "module",
   "packageManager": "pnpm@10.33.0",
