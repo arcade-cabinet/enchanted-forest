@@ -15,9 +15,13 @@ const RITUAL_COLORS: Record<RuneType, string> = {
 export function GroveStage({
   ritualCue,
   threatLevel,
+  showCueLabel = true,
 }: {
   ritualCue: ForestRitualCue;
   threatLevel: number;
+  // During the tutorial phase the big overlay already says "Draw a circle",
+  // so the focus-ring's "DRAW SHIELD" label is redundant and visually noisy.
+  showCueLabel?: boolean;
 }) {
   const threatOpacity = Math.min(0.38, threatLevel / 220);
 
@@ -57,7 +61,7 @@ export function GroveStage({
         />
       ))}
 
-      <RitualFocus cue={ritualCue} />
+      <RitualFocus cue={ritualCue} showLabel={showCueLabel} />
 
       {layout.roots.map((root) => (
         <div
@@ -117,7 +121,7 @@ export function GroveStage({
   );
 }
 
-function RitualFocus({ cue }: { cue: ForestRitualCue }) {
+function RitualFocus({ cue, showLabel }: { cue: ForestRitualCue; showLabel: boolean }) {
   const color = RITUAL_COLORS[cue.recommendedRune];
   const width = cue.recommendedRune === "purify" ? cue.focusRadius * 1.55 : cue.focusRadius * 1.8;
   const height = cue.recommendedRune === "purify" ? cue.focusRadius * 0.86 : cue.focusRadius * 0.72;
@@ -163,20 +167,22 @@ function RitualFocus({ cue }: { cue: ForestRitualCue }) {
         }}
         transition={{ duration: cue.threatBand === "critical" ? 0.9 : 1.7, repeat: Infinity }}
       />
-      <motion.div
-        className="absolute z-[12] rounded border border-white/15 bg-black/72 px-2 py-1 text-[10px] font-black uppercase text-white shadow-lg backdrop-blur"
-        style={{
-          boxShadow: `0 0 18px ${color}55`,
-          color,
-          left: `${cue.focusX}%`,
-          top: `${Math.max(18, cue.focusY - 17)}%`,
-          transform: "translate(-50%, -50%)",
-        }}
-        animate={{ opacity: [0.7, 1, 0.7], y: [0, -2, 0] }}
-        transition={{ duration: 1.4, repeat: Infinity }}
-      >
-        Draw {cue.recommendedRune}
-      </motion.div>
+      {showLabel && (
+        <motion.div
+          className="absolute z-[12] rounded border border-white/15 bg-black/72 px-2 py-1 text-[10px] font-black uppercase text-white shadow-lg backdrop-blur"
+          style={{
+            boxShadow: `0 0 18px ${color}55`,
+            color,
+            left: `${cue.focusX}%`,
+            top: `${Math.max(18, cue.focusY - 17)}%`,
+            transform: "translate(-50%, -50%)",
+          }}
+          animate={{ opacity: [0.7, 1, 0.7], y: [0, -2, 0] }}
+          transition={{ duration: 1.4, repeat: Infinity }}
+        >
+          Draw {cue.recommendedRune}
+        </motion.div>
+      )}
     </>
   );
 }

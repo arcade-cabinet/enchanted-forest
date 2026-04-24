@@ -1,0 +1,17 @@
+- generic [ref=e3]:
+  - generic [ref=e10]:
+    - generic:
+      - heading "ENCHANTED FOREST" [level=1]
+      - paragraph: Learn a rune, chain it, survive grove variety that tests the reading of your cadence. Finish as a wiser mage.
+      - generic:
+        - generic:
+          - generic: ✶
+          - generic: Draw a rune
+        - generic:
+          - generic: ◇
+          - generic: Chain its cadence
+        - generic:
+          - generic: ◈
+          - generic: Seal the grove
+      - button "START" [ref=e12] [cursor=pointer]
+  - button "Mute audio" [ref=e13] [cursor=pointer]: 🔊

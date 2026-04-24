@@ -76,6 +76,10 @@ export function ForestGame() {
   );
 
   const startGame = async (mode: SessionMode, saveSlot?: GameSaveSlot) => {
+    // Unlock the AudioContext synchronously in the same frame as the user
+    // click so Chrome doesn't log an autoplay warning during the async gap
+    // before Tone.start() resolves.
+    forestAudio.unlock();
     const status = await forestAudio.initialize();
     setAudioStatus(status);
     forestAudio.startAmbient();
@@ -253,7 +257,11 @@ export function ForestGame() {
       />
       {showPlayfield && (
         <>
-          <GroveStage ritualCue={ritualCue} threatLevel={forestState.threatLevel} />
+          <GroveStage
+            ritualCue={ritualCue}
+            threatLevel={forestState.threatLevel}
+            showCueLabel={forestState.phase === "playing"}
+          />
           <NoiseBackground />
           <FireflyParticles count={40} />
 

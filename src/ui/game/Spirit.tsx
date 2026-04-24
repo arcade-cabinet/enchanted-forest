@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface SpiritProps {
   position: { x: number; y: number };
@@ -8,21 +8,28 @@ interface SpiritProps {
 
 const NOTES = ["♪", "♫", "♬", "♩"];
 const PULSE_RINGS = ["inner", "middle", "outer"] as const;
+const TRAIL_LIMIT = 15;
+// Throttle trail appends: a pointermove can fire hundreds of times per second
+// but a 50ms cadence is already far denser than the eye reads at this blur.
+const TRAIL_MIN_INTERVAL_MS = 50;
 
 export function Spirit({ position, isDrawing }: SpiritProps) {
   const [trail, setTrail] = useState<{ x: number; y: number; id: number; note: string }[]>([]);
+  const trailIdRef = useRef(0);
+  const lastTrailMsRef = useRef(0);
 
   useEffect(() => {
+    const now =
+      typeof performance !== "undefined" && performance.now ? performance.now() : Date.now();
+    if (now - lastTrailMsRef.current < TRAIL_MIN_INTERVAL_MS) return;
+    lastTrailMsRef.current = now;
+    const id = trailIdRef.current++;
+    // Deterministic note choice — avoids Math.random churn on every move.
+    const note = NOTES[id % NOTES.length];
     setTrail((prev) => {
-      const newTrail = [
-        ...prev,
-        {
-          ...position,
-          id: Date.now(),
-          note: NOTES[Math.floor(Math.random() * NOTES.length)],
-        },
-      ];
-      return newTrail.slice(-15);
+      const next = prev.length >= TRAIL_LIMIT ? prev.slice(1) : prev.slice();
+      next.push({ x: position.x, y: position.y, id, note });
+      return next;
     });
   }, [position]);
 
@@ -134,35 +141,7 @@ export function Spirit({ position, isDrawing }: SpiritProps) {
           }}
         />
 
-        <motion.div
-          className="w-4 h-4 -m-2 rounded-full"
-          style={{
-            background: isDrawing
-              ? "radial-gradient(circle, rgba(255, 255, 220, 1) 0%, rgba(255, 220, 100, 0.8) 70%)"
-              : "radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(180, 220, 255, 0.8) 70%)",
-            boxShadow: isDrawing
-              ? "0 0 20px rgba(255, 220, 100, 0.8)"
-              : "0 0 15px rgba(180, 220, 255, 0.6)",
-          }}
-          animate={{
-            boxShadow: isDrawing
-              ? [
-                  "0 0 20px rgba(255, 220, 100, 0.8)",
-                  "0 0 35px rgba(255, 220, 100, 1)",
-                  "0 0 20px rgba(255, 220, 100, 0.8)",
-                ]
-              : [
-                  "0 0 15px rgba(180, 220, 255, 0.6)",
-                  "0 0 25px rgba(180, 220, 255, 0.8)",
-                  "0 0 15px rgba(180, 220, 255, 0.6)",
-                ],
-          }}
-          transition={{
-            duration: isDrawing ? 0.4 : 2,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
-        />
+        <FireflySpirit isDrawing={isDrawing} />
 
         {isDrawing &&
           NOTES.map((note, index) => (
@@ -195,5 +174,74 @@ export function Spirit({ position, isDrawing }: SpiritProps) {
           ))}
       </motion.div>
     </>
+  );
+}
+
+// Silhouette: body + two translucent wings. Wings flutter faster while drawing
+// (the spirit is "singing" the rune).
+function FireflySpirit({ isDrawing }: { isDrawing: boolean }) {
+  const body = isDrawing ? "#fde68a" : "#e0f2fe";
+  const glow = isDrawing ? "rgba(251, 191, 36, 0.9)" : "rgba(191, 219, 254, 0.9)";
+  const wing = isDrawing ? "rgba(253, 230, 138, 0.5)" : "rgba(224, 242, 254, 0.45)";
+  return (
+    <motion.div
+      className="-m-4"
+      style={{ width: 32, height: 32, filter: `drop-shadow(0 0 8px ${glow})` }}
+      animate={{ rotate: isDrawing ? [-4, 4, -4] : [-2, 2, -2] }}
+      transition={{ duration: isDrawing ? 0.25 : 2.2, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <svg viewBox="0 0 32 32" width="32" height="32" aria-hidden="true">
+        {/* Left wing */}
+        <motion.ellipse
+          cx="11"
+          cy="13"
+          rx="6"
+          ry="3"
+          fill={wing}
+          animate={{
+            scaleX: isDrawing ? [0.8, 1.1, 0.8] : [0.9, 1.04, 0.9],
+            opacity: [0.45, 0.85, 0.45],
+          }}
+          transition={{ duration: isDrawing ? 0.22 : 0.9, repeat: Infinity, ease: "easeInOut" }}
+          style={{ transformOrigin: "16px 13px" }}
+        />
+        {/* Right wing */}
+        <motion.ellipse
+          cx="21"
+          cy="13"
+          rx="6"
+          ry="3"
+          fill={wing}
+          animate={{
+            scaleX: isDrawing ? [0.8, 1.1, 0.8] : [0.9, 1.04, 0.9],
+            opacity: [0.45, 0.85, 0.45],
+          }}
+          transition={{
+            duration: isDrawing ? 0.22 : 0.9,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.05,
+          }}
+          style={{ transformOrigin: "16px 13px" }}
+        />
+        {/* Body — slim oval */}
+        <ellipse cx="16" cy="17" rx="2.6" ry="5" fill="#2a1b0e" />
+        {/* Abdomen lantern — animated glow */}
+        <motion.circle
+          cx="16"
+          cy="20"
+          r="2.2"
+          fill={body}
+          animate={{ opacity: [0.7, 1, 0.7], r: isDrawing ? [2.4, 3, 2.4] : [2, 2.5, 2] }}
+          transition={{
+            duration: isDrawing ? 0.35 : 1.6,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+        {/* Head */}
+        <circle cx="16" cy="12" r="1.6" fill="#140a04" />
+      </svg>
+    </motion.div>
   );
 }

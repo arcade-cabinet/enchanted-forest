@@ -35,6 +35,23 @@ class ForestAudioEngine {
   private ambientSequence: Tone.Sequence | null = null;
   private isAmbientPlaying = false;
 
+  // Call this synchronously from a pointerdown/click handler BEFORE awaiting
+  // initialize(). It nudges the underlying AudioContext into "running" during
+  // the user-gesture frame, which suppresses Chrome's autoplay warning that
+  // otherwise logs when Tone.start()'s promise resolution crosses a frame
+  // boundary. Safe to call many times.
+  unlock(): void {
+    try {
+      const ctx = Tone.getContext().rawContext as AudioContext;
+      if (ctx && ctx.state === "suspended" && typeof ctx.resume === "function") {
+        // fire-and-forget — we don't await; the real init awaits Tone.start()
+        void ctx.resume();
+      }
+    } catch {
+      // audio may be completely unavailable (SSR, test env) — ignore
+    }
+  }
+
   async initialize(): Promise<ForestAudioStatus> {
     if (this.initialized) return this.getStatus();
 
