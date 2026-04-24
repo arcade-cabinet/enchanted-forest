@@ -1,0 +1,11 @@
+{
+  "name": "Shield",
+  "type": "shield",
+  "description": "Draw a circle to create a protective barrier",
+  "templatePoints": { "shape": "circle", "segments": 16 },
+  "tolerance": 0.35,
+  "color": "#4ade80",
+  "glowColor": "rgba(74, 222, 128, 0.6)",
+  "manaCost": 20,
+  "duration": 5000
+}

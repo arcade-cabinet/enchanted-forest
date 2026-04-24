@@ -6,6 +6,13 @@
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "scripts": {
+    "content:compile": "node scripts/compile-content.mjs",
+    "predev": "pnpm run content:compile",
+    "prebuild": "pnpm run content:compile",
+    "pretypecheck": "pnpm run content:compile",
+    "pretest:node": "pnpm run content:compile",
+    "pretest:dom": "pnpm run content:compile",
+    "pretest:browser": "pnpm run content:compile",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
@@ -41,7 +48,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "seedrandom": "^3.0.5",
-    "tone": "^15.1.22"
+    "tone": "^15.1.22",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.11",

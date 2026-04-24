@@ -4,6 +4,9 @@ coverage/
 .DS_Store
 .vite/
 
+# Generated content (authored in config/raw/)
+config/compiled/
+
 # Vitest
 test-results/
 playwright-report/

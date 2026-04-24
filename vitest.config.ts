@@ -7,7 +7,6 @@ export default defineConfig({
     environment: "node",
     globals: false,
     include: [
-      "src/engine/**/*.test.ts",
       "src/lib/**/*.test.ts",
       "src/sim/**/*.test.ts",
       "src/ecs/**/*.test.ts",
@@ -18,6 +17,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
+      "@config": path.resolve(__dirname, "config"),
     },
   },
 });

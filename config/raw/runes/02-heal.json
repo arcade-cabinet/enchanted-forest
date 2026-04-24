@@ -1,0 +1,19 @@
+{
+  "name": "Heal",
+  "type": "heal",
+  "description": "Draw an upward triangle to heal sacred trees",
+  "templatePoints": {
+    "shape": "polyline",
+    "points": [
+      { "x": 0.5, "y": 0 },
+      { "x": 0, "y": 1 },
+      { "x": 1, "y": 1 },
+      { "x": 0.5, "y": 0 }
+    ]
+  },
+  "tolerance": 0.45,
+  "color": "#a78bfa",
+  "glowColor": "rgba(167, 139, 250, 0.6)",
+  "manaCost": 30,
+  "duration": 3000
+}
