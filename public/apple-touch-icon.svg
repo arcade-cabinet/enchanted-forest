@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180">
+  <title>Enchanted Forest</title>
+  <!-- iOS requests a square PNG; this SVG is the editable source
+       the build can re-rasterise. Mark scaled up from the 64px
+       favicon with identical composition. -->
+
+  <rect width="180" height="180" rx="36" fill="#0c1a10" />
+  <circle cx="90" cy="90" r="82" fill="#1a3a22" />
+
+  <circle cx="90" cy="90" r="60" fill="#2e4a2f" opacity="0.6" />
+  <circle cx="90" cy="90" r="38" fill="#f2c14e" opacity="0.08" />
+
+  <!-- Shield (top, circle) -->
+  <circle cx="90" cy="35" r="11" fill="none" stroke="#f2c14e" stroke-width="4" />
+  <circle cx="90" cy="35" r="4" fill="#f2c14e" />
+
+  <!-- Heal (lower-left, upward triangle) -->
+  <path
+    d="M 40 118 L 58 118 L 49 103 Z"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="4"
+    stroke-linejoin="round"
+  />
+  <circle cx="49" cy="112" r="3.4" fill="#f2c14e" />
+
+  <!-- Purify (lower-right, zigzag) -->
+  <path
+    d="M 122 103 L 128 118 L 134 103 L 140 118"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="4"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Triskelion arms -->
+  <path
+    d="M 90 90 Q 90 56, 90 42 M 90 90 Q 60 84, 49 110 M 90 90 Q 120 84, 131 110"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="3.6"
+    stroke-linecap="round"
+    opacity="0.55"
+  />
+
+  <!-- Central spirit-light node -->
+  <circle cx="90" cy="90" r="9" fill="#ecf1df" opacity="0.95" />
+  <circle cx="86" cy="86" r="9" fill="#f2c14e" opacity="0.5" />
+</svg>

@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
+  <title>Enchanted Forest — adaptive launcher foreground</title>
+  <!--
+    Adaptive-icon foreground. Transparent background; the launcher
+    system composes this over the `ic_launcher_background` color.
+    Mark is centered inside the 66dp safe zone (21..87 on the
+    108dp canvas).
+  -->
+
+  <!-- Subtle moonlit halo so the mark reads even on a solid bg -->
+  <circle cx="54" cy="54" r="34" fill="#2e4a2f" opacity="0.55" />
+  <circle cx="54" cy="54" r="22" fill="#f2c14e" opacity="0.1" />
+
+  <!-- Shield (top, circle) -->
+  <circle cx="54" cy="24" r="7" fill="none" stroke="#f2c14e" stroke-width="2.8" />
+  <circle cx="54" cy="24" r="2.6" fill="#f2c14e" />
+
+  <!-- Heal (lower-left, upward triangle) -->
+  <path
+    d="M 25 78 L 37 78 L 31 68 Z"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="2.8"
+    stroke-linejoin="round"
+  />
+  <circle cx="31" cy="74" r="2.2" fill="#f2c14e" />
+
+  <!-- Purify (lower-right, zigzag) -->
+  <path
+    d="M 73 68 L 77 78 L 81 68 L 85 78"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="2.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Triskelion arms — three curves spiraling to center -->
+  <path
+    d="M 54 54 Q 54 38, 54 30 M 54 54 Q 36 50, 31 74 M 54 54 Q 72 50, 77 74"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="2.5"
+    stroke-linecap="round"
+    opacity="0.55"
+  />
+
+  <!-- Central spirit-light -->
+  <circle cx="54" cy="54" r="6" fill="#ecf1df" opacity="0.95" />
+  <circle cx="51" cy="51" r="6" fill="#f2c14e" opacity="0.5" />
+</svg>

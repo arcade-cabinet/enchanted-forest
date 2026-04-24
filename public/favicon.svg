@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <title>Enchanted Forest</title>
+  <!-- Deep-forest backdrop disk -->
+  <rect width="64" height="64" fill="#0c1a10" />
+  <circle cx="32" cy="32" r="30" fill="#1a3a22" />
+
+  <!-- Moonlit halo behind the triskelion -->
+  <circle cx="32" cy="32" r="22" fill="#2e4a2f" opacity="0.6" />
+  <circle cx="32" cy="32" r="14" fill="#f2c14e" opacity="0.08" />
+
+  <!-- Three-rune triskelion: shield · heal · purify at 120° -->
+  <!-- Each rune sits on an orbit at radius 18 from center. -->
+
+  <!-- Shield (top, circle) -->
+  <circle cx="32" cy="14" r="4" fill="none" stroke="#f2c14e" stroke-width="1.6" />
+  <circle cx="32" cy="14" r="1.4" fill="#f2c14e" />
+
+  <!-- Heal (lower-left, upward triangle) -->
+  <path
+    d="M 14.44 41 L 20.44 41 L 17.44 36 Z"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="1.6"
+    stroke-linejoin="round"
+  />
+  <circle cx="17.44" cy="39" r="1.2" fill="#f2c14e" />
+
+  <!-- Purify (lower-right, zigzag) -->
+  <path
+    d="M 43.56 36 L 45.56 41 L 47.56 36 L 49.56 41"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="1.6"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Three curving arms joining the rune glyphs to a central node,
+       spiraling counter-clockwise — the triskelion motion. -->
+  <path
+    d="M 32 32 Q 32 20, 32 16 M 32 32 Q 20 30, 17 37 M 32 32 Q 44 30, 47 37"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="1.4"
+    stroke-linecap="round"
+    opacity="0.55"
+  />
+
+  <!-- Central node — spirit light -->
+  <circle cx="32" cy="32" r="3" fill="#ecf1df" opacity="0.95" />
+  <circle cx="30" cy="30" r="3" fill="#f2c14e" opacity="0.5" />
+</svg>
