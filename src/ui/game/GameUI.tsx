@@ -389,7 +389,7 @@ export function GameUI({
       </AnimatePresence>
 
       {(gameState === "playing" || gameState === "tutorial") && (
-        <div className="fixed inset-x-0 top-0 z-40 p-3 md:p-4 pointer-events-none">
+        <div data-testid="hud" className="fixed inset-x-0 top-0 z-40 p-3 md:p-4 pointer-events-none">
           <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] gap-3 md:gap-4 items-start max-w-5xl mx-auto">
             <motion.div
               className="relative"
@@ -591,13 +591,26 @@ export function GameUI({
 
       {gameState === "victory" && <DramaticFlash text="SEALED" subtext="The grove is whole" color="#fbbf24" />}
       {gameState === "victory" && (
-        <button
-          type="button"
-          className="fixed bottom-8 left-1/2 z-[60] -translate-x-1/2 rounded-lg border border-amber-300/40 bg-amber-900/80 px-8 py-3 text-white font-black"
-          onClick={onRestart}
+        <motion.div
+          className="fixed inset-0 z-[55] flex flex-col items-center justify-center pointer-events-none"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2, duration: 1 }}
         >
-          SEALED {runSummary.totalWaves} WAVES / RESTART
-        </button>
+          <div className="bg-black/80 backdrop-blur-md border border-amber-500/30 p-8 rounded-xl text-center max-w-lg mt-32 pointer-events-auto">
+            <h2 className="text-amber-400 font-black text-2xl tracking-widest mb-4">VICTORY DIARY</h2>
+            <p className="text-emerald-100/80 mb-6">
+              Every rune you cast shaped the harmony of this grove. (Diary implementation pending)
+            </p>
+            <button
+              type="button"
+              className="rounded-lg border border-amber-300/40 bg-amber-900/80 px-8 py-3 text-white font-black hover:bg-amber-800/80 transition-colors"
+              onClick={onRestart}
+            >
+              SEALED {runSummary.totalWaves} WAVES / RESTART
+            </button>
+          </div>
+        </motion.div>
       )}
       {gameState === "defeat" && (
         <>

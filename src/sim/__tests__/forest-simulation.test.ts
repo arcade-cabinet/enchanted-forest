@@ -41,8 +41,9 @@ describe("forest simulation", () => {
   });
 
   test("spawns deterministic corruption waves with stable ids and targets", () => {
-    const wave = spawnCorruptionWave(3, 10);
-    const again = spawnCorruptionWave(3, 10);
+    const state = createInitialForestState("playing", "standard", 42);
+    const wave = spawnCorruptionWave(state, 3, 10);
+    const again = spawnCorruptionWave(state, 3, 10);
 
     expect(wave).toEqual(again);
     expect(wave.shadows).toHaveLength(9);
@@ -52,9 +53,9 @@ describe("forest simulation", () => {
   });
 
   test("uses session modes for shadow pressure and mana recovery", () => {
-    const cozy = spawnCorruptionWave(3, 10, "cozy");
-    const standard = spawnCorruptionWave(3, 10, "standard");
-    const challenge = spawnCorruptionWave(3, 10, "challenge");
+    const cozy = spawnCorruptionWave(createInitialForestState("playing", "cozy"), 3, 10, "cozy");
+    const standard = spawnCorruptionWave(createInitialForestState("playing", "standard"), 3, 10, "standard");
+    const challenge = spawnCorruptionWave(createInitialForestState("playing", "challenge"), 3, 10, "challenge");
 
     expect(cozy.shadows[0]?.speed).toBeLessThan(standard.shadows[0]?.speed ?? 0);
     expect(challenge.shadows[0]?.speed).toBeGreaterThan(standard.shadows[0]?.speed ?? 0);
@@ -67,7 +68,7 @@ describe("forest simulation", () => {
   });
 
   test("exposes deterministic shadow intent paths for target telegraphs", () => {
-    const wave = spawnCorruptionWave(1, 10);
+    const wave = spawnCorruptionWave(createInitialForestState("playing"), 1, 10);
     const firstShadow = wave.shadows[0];
     if (!firstShadow) throw new Error("missing shadow");
 
@@ -194,11 +195,9 @@ describe("forest simulation", () => {
   });
 
   test("handles shadow movement, tree hits, purification, and wave transitions", () => {
-    const spawned = spawnCorruptionWave(1, 0);
-    const state = {
-      ...createInitialForestState("playing"),
-      shadows: spawned.shadows,
-    };
+    const state = createInitialForestState("playing");
+    const spawned = spawnCorruptionWave(state, 1, 0);
+    state.shadows = spawned.shadows;
     const firstShadow = spawned.shadows[0];
     if (!firstShadow) throw new Error("missing shadow");
 

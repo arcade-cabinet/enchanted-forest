@@ -2,14 +2,14 @@ import { expect, test } from "@playwright/test";
 
 // Multi-viewport journey harness. Captures a screenshot per beat at each
 // viewport so the dev can scan the whole player path in one glance.
-// Intent: landing → tutorial → first cast → playing → (restart path).
+// Intent: landing → tutorial → first cast → playing → victory → restart.
 //
 // These specs don't assert frame-perfect visuals — they assert that the
 // cold player can see the title and the primary CTA, and that clicking the
 // CTA advances into the grove. They also assert zero console errors, which
 // is the single strongest proxy for "did anything regress."
 
-const beats = ["landing", "tutorial", "first-cast", "playing", "restart"] as const;
+const beats = ["landing", "tutorial", "first-cast", "playing", "victory", "restart"] as const;
 type Beat = (typeof beats)[number];
 
 async function snap(page: import("@playwright/test").Page, beat: Beat) {
@@ -27,7 +27,7 @@ test.describe("Enchanted Forest — cold journey", () => {
       if (msg.type() === "error") consoleErrors.push(msg.text());
     });
 
-    await page.goto("/");
+    await page.goto("/?seed=fast-wave");
     await expect(page.getByRole("heading", { name: /enchanted forest/i })).toBeVisible();
     const cta = page.getByRole("button", { name: /^start$/i });
     await expect(cta).toBeVisible();
@@ -72,6 +72,17 @@ test.describe("Enchanted Forest — cold journey", () => {
     // generous window and then confirm we're no longer in tutorial.
     await page.waitForTimeout(1500);
     await snap(page, "playing");
+
+    await expect(page.getByTestId("hud")).toBeVisible();
+    await expect(page.getByTestId("corruption-wave")).toBeVisible();
+
+    // Cheat to trigger victory
+    await page.evaluate(() => {
+      (window as any).__EF_CHEAT_VICTORY?.();
+    });
+
+    await expect(page.getByText(/SEALED/i)).toBeVisible({ timeout: 3000 });
+    await snap(page, "victory");
 
     expect(consoleErrors, consoleErrors.join("\n")).toEqual([]);
   });

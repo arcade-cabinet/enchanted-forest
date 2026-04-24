@@ -6,9 +6,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "html",
+  reporter: process.env.CI ? [["github"], ["list"]] : "list",
   use: {
-    baseURL: "http://localhost:4173",
+    baseURL: "http://localhost:41733",
     trace: "on-first-retry",
   },
   projects: [
@@ -17,13 +17,17 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 720 } },
     },
     {
+      name: "tablet-chromium",
+      use: { ...devices["iPad Mini"] },
+    },
+    {
       name: "mobile-chromium",
       use: { ...devices["Pixel 7"] },
     },
   ],
   webServer: {
-    command: "pnpm preview --port 4173",
-    url: "http://localhost:4173",
+    command: "pnpm preview --port 41733",
+    url: "http://localhost:41733",
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },

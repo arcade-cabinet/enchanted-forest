@@ -76,6 +76,7 @@ export interface ForestSpellCadenceCue {
 }
 
 export interface ForestState {
+  seed: number;
   phase: ForestPhase;
   sessionMode: SessionMode;
   elapsedMs: number;
