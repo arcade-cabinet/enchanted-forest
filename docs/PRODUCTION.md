@@ -96,10 +96,24 @@ sequence is different from bioluminescent-sea's and cosmic-gardener's.
       still formula-driven (`wave * 3` shadows in
       `spawnCorruptionWave`); if distinct wave-authoring is ever
       needed it's a follow-up on the same pipeline.
-- [ ] **PR G — Identity icons.** Favicon, apple-touch, OG image with
-      the enchanted-forest identity (three-rune triskelion on a deep
-      forest green with warm amber accents). Android icon pack at all
-      mipmap resolutions.
+- [x] **PR G — Identity icons.** Web favicon / apple-touch /
+      OG image shipped at `public/{favicon,apple-touch-icon,og-image}.svg`
+      with the enchanted-forest identity: three-rune triskelion
+      (shield · heal · purify glyphs at 120°) on the deep-forest
+      backdrop (`#0c1a10` bg, `#1a3a22` moss disk, `#2e4a2f`
+      halo, `#f2c14e` firefly amber for the rune glyphs + arms).
+      `index.html` now links the apple-touch icon and carries
+      OG + Twitter meta tags with the "Learn a rune, chain its
+      cadence, seal the grove" tagline. All asset paths are
+      relative (`./` not `/`) so GitHub Pages subpath serving
+      works. Android mipmap pack generated from
+      `res-svg/ic_launcher_{foreground,legacy}.svg` at all five
+      densities (48/72/96/144/192 px) — covers
+      `ic_launcher.png`, `ic_launcher_round.png`, and
+      `ic_launcher_foreground.png` for the adaptive-icon path.
+      Adaptive-icon background updated from default white to
+      `#0c1a10` so the launcher reads as the same forest identity
+      as the web tabs.
 - [ ] **PR H — Production deploy.** `release.yml` tags + builds
       Android AAB. `cd.yml` deploys web bundle to GitHub Pages.
       `analysis-nightly.yml` runs a determinism sweep.

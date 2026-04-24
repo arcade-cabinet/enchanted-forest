@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108">
+  <title>Enchanted Forest — legacy launcher (adaptive-unaware devices)</title>
+  <!--
+    Legacy launcher: full backdrop baked in for pre-Oreo devices.
+    Adaptive devices use ic_launcher.xml +
+    ic_launcher_foreground.svg instead.
+  -->
+  <rect width="108" height="108" rx="18" fill="#0c1a10" />
+  <circle cx="54" cy="54" r="42" fill="#1a3a22" />
+  <circle cx="54" cy="54" r="32" fill="#2e4a2f" opacity="0.6" />
+  <circle cx="54" cy="54" r="20" fill="#f2c14e" opacity="0.1" />
+
+  <!-- Shield (top, circle) -->
+  <circle cx="54" cy="22" r="5.5" fill="none" stroke="#f2c14e" stroke-width="2.2" />
+  <circle cx="54" cy="22" r="2" fill="#f2c14e" />
+
+  <!-- Heal (lower-left, upward triangle) -->
+  <path
+    d="M 26 78 L 36 78 L 31 70 Z"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="2.2"
+    stroke-linejoin="round"
+  />
+  <circle cx="31" cy="74.5" r="1.8" fill="#f2c14e" />
+
+  <!-- Purify (lower-right, zigzag) -->
+  <path
+    d="M 72 70 L 76 78 L 80 70 L 84 78"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="2.2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Triskelion arms -->
+  <path
+    d="M 54 54 Q 54 38, 54 28 M 54 54 Q 38 50, 31 74 M 54 54 Q 70 50, 77 74"
+    fill="none"
+    stroke="#f2c14e"
+    stroke-width="2"
+    stroke-linecap="round"
+    opacity="0.55"
+  />
+
+  <!-- Central spirit-light -->
+  <circle cx="54" cy="54" r="5" fill="#ecf1df" opacity="0.95" />
+  <circle cx="51" cy="51" r="5" fill="#f2c14e" opacity="0.5" />
+</svg>
