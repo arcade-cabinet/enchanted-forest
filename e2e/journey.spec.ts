@@ -34,6 +34,11 @@ test.describe("Enchanted Forest — cold journey", () => {
     await snap(page, "landing");
 
     await cta.click();
+
+    // The new game customization modal should appear
+    await expect(page.getByText(/world seed/i)).toBeVisible({ timeout: 3000 });
+    await page.getByRole("button", { name: /begin journey/i }).click();
+
     await expect(page.getByText(/draw a circle anywhere/i)).toBeVisible({ timeout: 3000 });
     await snap(page, "tutorial");
 
@@ -81,7 +86,7 @@ test.describe("Enchanted Forest — cold journey", () => {
       (window as any).__EF_CHEAT_VICTORY?.();
     });
 
-    await expect(page.getByText(/SEALED/i)).toBeVisible({ timeout: 3000 });
+    await expect(page.getByText(/VICTORY DIARY/i)).toBeVisible({ timeout: 3000 });
     await snap(page, "victory");
 
     expect(consoleErrors, consoleErrors.join("\n")).toEqual([]);
@@ -90,6 +95,8 @@ test.describe("Enchanted Forest — cold journey", () => {
   test("restart on defeat does not error", async ({ page }) => {
     await page.goto("/");
     await page.getByRole("button", { name: /^start$/i }).click();
+    await expect(page.getByText(/world seed/i)).toBeVisible({ timeout: 3000 });
+    await page.getByRole("button", { name: /begin journey/i }).click();
     await expect(page.getByText(/draw a circle anywhere/i)).toBeVisible({ timeout: 3000 });
     // Simulate a user who stops playing: wait for waves to punish the trees.
     // Pure smoke — we only need to see the restart path render if reached.

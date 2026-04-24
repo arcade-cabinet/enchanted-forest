@@ -304,15 +304,17 @@ export function ForestGame() {
             />
           ))}
 
-          <CorruptionWave
-            shadows={forestState.shadows}
-            shadowIntents={forestState.shadows.map(getShadowIntentPath)}
-            treePositions={TREE_POSITIONS}
-            onShadowReachTree={handleShadowReach}
-            onShadowPurified={handleShadowPurified}
-            isPurifying={!!forestState.purifyZone}
-            purifyZone={forestState.purifyZone}
-          />
+          <div data-testid="corruption-wave" className="absolute inset-0 pointer-events-none">
+            <CorruptionWave
+              shadows={forestState.shadows}
+              shadowIntents={forestState.shadows.map(getShadowIntentPath)}
+              treePositions={TREE_POSITIONS}
+              onShadowReachTree={handleShadowReach}
+              onShadowPurified={handleShadowPurified}
+              isPurifying={!!forestState.purifyZone}
+              purifyZone={forestState.purifyZone}
+            />
+          </div>
 
           <ToneDrawer
             onSpellCast={handleSpellCast}

@@ -9,6 +9,7 @@ import { RUNE_PATTERNS } from "@/lib/runePatterns";
 import type { GameSaveSlot, SessionMode } from "@/lib/sessionMode";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { codenameFromSeed, randomSeed } from "@/sim/rng";
 
 const RADIAL_SPEED_LINES = Array.from({ length: 24 }, (_, index) => ({
   id: `radial-speed-line-${index + 1}`,
@@ -40,7 +41,7 @@ interface GameUIProps {
   maxMana: number;
   isPaused: boolean;
   gameState: "intro" | "tutorial" | "playing" | "victory" | "defeat";
-  onStart: (mode: SessionMode, saveSlot?: GameSaveSlot) => void;
+  onStart: (mode: SessionMode, saveSlot?: GameSaveSlot, seed?: number) => void;
   onRestart: () => void;
   lastRune?: string | null;
   objective: string;
@@ -365,6 +366,8 @@ export function GameUI({
   runSummary,
 }: GameUIProps) {
   const [showRuneEffect, setShowRuneEffect] = useState<(typeof RUNE_PATTERNS)[0] | null>(null);
+  const [showNewGameModal, setShowNewGameModal] = useState(false);
+  const [pendingSeed, setPendingSeed] = useState<number>(0);
 
   useEffect(() => {
     if (lastRune) {
@@ -500,6 +503,7 @@ export function GameUI({
       {gameState === "tutorial" && (
         <motion.div
           key="tutorial-overlay"
+          data-testid="tutorial-overlay"
           className="fixed inset-0 z-40 pointer-events-none flex items-center justify-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -575,7 +579,13 @@ export function GameUI({
           <StartScreen
             title="ENCHANTED FOREST"
             subtitle="Learn a rune, chain it, survive grove variety that tests the reading of your cadence. Finish as a wiser mage."
-            primaryAction={{ label: "START", onClick: () => onStart("standard") }}
+            primaryAction={{
+              label: "START",
+              onClick: () => {
+                setPendingSeed(randomSeed());
+                setShowNewGameModal(true);
+              },
+            }}
             glowColor="var(--color-firefly)"
             glowRgb="242, 193, 78"
             displayClassName="ef-display"
@@ -586,6 +596,56 @@ export function GameUI({
             ]}
             renderHero={() => <LandingHero />}
           />
+          {showNewGameModal && (
+            <motion.div
+              className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md px-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div className="bg-emerald-950/90 border border-emerald-500/30 p-8 rounded-xl text-center max-w-md w-full shadow-2xl">
+                <h2 className="text-emerald-400 font-black text-xl tracking-widest mb-2 uppercase">
+                  World Seed
+                </h2>
+                <p className="text-emerald-100/70 text-sm mb-6">
+                  Your grove's layout, corruption rhythms, and fate are bound to this codename.
+                </p>
+                <div className="bg-black/50 py-4 px-6 rounded border border-amber-500/20 mb-6">
+                  <div className="text-amber-400 font-bold text-2xl tracking-widest uppercase" style={{ fontFamily: "Cormorant Garamond, Cinzel, serif" }}>
+                    {codenameFromSeed(pendingSeed)}
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <button
+                    type="button"
+                    className="w-full rounded border border-amber-500 bg-amber-500/20 px-4 py-3 text-amber-100 font-black tracking-widest hover:bg-amber-500/30 transition-colors uppercase"
+                    onClick={() => {
+                      setShowNewGameModal(false);
+                      onStart("standard", undefined, pendingSeed);
+                    }}
+                  >
+                    Begin Journey
+                  </button>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      className="flex-1 rounded border border-emerald-500/30 bg-emerald-900/50 px-4 py-2 text-emerald-200 font-bold hover:bg-emerald-800/50 transition-colors uppercase text-sm"
+                      onClick={() => setPendingSeed(randomSeed())}
+                    >
+                      Reroll Seed
+                    </button>
+                    <button
+                      type="button"
+                      className="flex-1 rounded border border-emerald-500/30 bg-transparent px-4 py-2 text-emerald-200/60 font-bold hover:bg-emerald-900/30 hover:text-emerald-200 transition-colors uppercase text-sm"
+                      onClick={() => setShowNewGameModal(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </motion.div>
       )}
 

@@ -85,6 +85,7 @@ export function SacredTree({
 
   return (
     <motion.div
+      data-testid={`tree-${id}`}
       className="absolute flex flex-col items-center"
       style={{
         left: `${position.x}%`,
