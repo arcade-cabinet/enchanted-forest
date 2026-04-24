@@ -43,5 +43,6 @@ export function getForestRunSummary(state: ForestState) {
     targetMinutes: getForestSessionTargetMinutes(state.sessionMode),
     totalWaves: MAX_WAVES,
     wave: state.wave,
+    runesCast: state.runesCast,
   };
 }

@@ -94,6 +94,7 @@ export interface ForestState {
   healingTreeIndex: number | null;
   objective: string;
   threatLevel: number;
+  runesCast: Record<RuneType, number>;
 }
 
 export interface SpawnWaveResult {

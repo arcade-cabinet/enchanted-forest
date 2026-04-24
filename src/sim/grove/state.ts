@@ -27,6 +27,7 @@ export function createInitialForestState(
     healingTreeIndex: null,
     objective: DEFAULT_OBJECTIVE,
     threatLevel: 0,
+    runesCast: { shield: 0, heal: 0, purify: 0 },
   };
 }
 

@@ -657,17 +657,42 @@ export function GameUI({
           animate={{ opacity: 1 }}
           transition={{ delay: 2, duration: 1 }}
         >
-          <div className="bg-black/80 backdrop-blur-md border border-amber-500/30 p-8 rounded-xl text-center max-w-lg mt-32 pointer-events-auto">
-            <h2 className="text-amber-400 font-black text-2xl tracking-widest mb-4">VICTORY DIARY</h2>
-            <p className="text-emerald-100/80 mb-6">
-              Every rune you cast shaped the harmony of this grove. (Diary implementation pending)
-            </p>
+          <div className="bg-emerald-950/90 backdrop-blur-md border border-amber-500/30 p-8 rounded-xl text-center max-w-lg mt-32 shadow-2xl pointer-events-auto">
+            <h2 className="text-amber-400 font-black text-3xl tracking-widest mb-2" style={{ fontFamily: "Cormorant Garamond, Cinzel, serif" }}>VICTORY DIARY</h2>
+            <div className="text-emerald-200/70 text-sm tracking-[0.2em] mb-8 uppercase">The Grove is Whole</div>
+            
+            <div className="grid grid-cols-3 gap-6 mb-8 text-left">
+              <div className="flex flex-col items-center bg-black/40 rounded p-4 border border-emerald-500/20">
+                <span className="text-emerald-400 text-3xl font-black mb-1">{runSummary.runesCast?.shield ?? 0}</span>
+                <span className="text-emerald-100/60 text-xs tracking-widest uppercase">Shields</span>
+              </div>
+              <div className="flex flex-col items-center bg-black/40 rounded p-4 border border-purple-500/20">
+                <span className="text-purple-400 text-3xl font-black mb-1">{runSummary.runesCast?.heal ?? 0}</span>
+                <span className="text-emerald-100/60 text-xs tracking-widest uppercase">Heals</span>
+              </div>
+              <div className="flex flex-col items-center bg-black/40 rounded p-4 border border-amber-500/20">
+                <span className="text-amber-400 text-3xl font-black mb-1">{runSummary.runesCast?.purify ?? 0}</span>
+                <span className="text-emerald-100/60 text-xs tracking-widest uppercase">Purifies</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-center bg-black/50 px-6 py-4 rounded mb-8 border border-white/5">
+              <div className="text-left">
+                <div className="text-emerald-100/60 text-[10px] tracking-widest uppercase mb-1">Time Survived</div>
+                <div className="text-emerald-200 font-bold text-xl">{Math.floor((runSummary.elapsedSeconds ?? 0) / 60)}:{(runSummary.elapsedSeconds % 60).toString().padStart(2, "0")}</div>
+              </div>
+              <div className="text-right">
+                <div className="text-emerald-100/60 text-[10px] tracking-widest uppercase mb-1">Max Harmony</div>
+                <div className="text-amber-300 font-bold text-xl">{runSummary.harmonyLevel} surges</div>
+              </div>
+            </div>
+
             <button
               type="button"
-              className="rounded-lg border border-amber-300/40 bg-amber-900/80 px-8 py-3 text-white font-black hover:bg-amber-800/80 transition-colors"
+              className="w-full rounded border border-amber-400 bg-amber-500/20 px-8 py-4 text-amber-100 font-black tracking-widest hover:bg-amber-500/30 transition-colors uppercase"
               onClick={onRestart}
             >
-              SEALED {runSummary.totalWaves} WAVES / RESTART
+              Seal {runSummary.totalWaves} Waves / Restart
             </button>
           </div>
         </motion.div>
