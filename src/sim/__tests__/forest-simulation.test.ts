@@ -1,10 +1,14 @@
 import { describe, expect, test } from "vitest";
-import { RUNE_PATTERNS } from "../lib/runePatterns";
+import { RUNE_PATTERNS } from "@/lib/runePatterns";
 import {
   advanceShadowPosition,
-  analyzeRuneGesture,
   applyShadowHit,
-  applySpellCast,
+  getShadowHitDamage,
+  getShadowIntentPath,
+  removePurifiedShadow,
+  spawnCorruptionWave,
+} from "@/sim/corruption";
+import {
   createGroveLayout,
   createInitialForestState,
   getForestModeTuning,
@@ -13,14 +17,10 @@ import {
   getForestSessionTargetMinutes,
   getForestSpellCadenceCue,
   getForestTransition,
-  getShadowHitDamage,
-  getShadowIntentPath,
   MAX_WAVES,
-  regenerateMana,
-  removePurifiedShadow,
-  spawnCorruptionWave,
   TREE_POSITIONS,
-} from "./forestSimulation";
+} from "@/sim/grove";
+import { analyzeRuneGesture, applySpellCast, regenerateMana } from "@/sim/runes";
 
 describe("forest simulation", () => {
   test("creates a complete intro/play state and authored grove layout", () => {

@@ -33,10 +33,30 @@ sequence is different from bioluminescent-sea's and cosmic-gardener's.
 - [x] **PR A — Foundation scaffolding.** Libraries, docs tree,
       directory skeleton, tsconfig split, Biome, Vitest, Playwright,
       Capacitor Android — in place from the initial extraction.
-- [ ] **PR B — Engine split.** Decompose the grove simulation into
-      responsibility-scoped modules (`src/sim/grove/*`,
-      `src/sim/runes/*`, `src/sim/corruption/*`). Old module path
-      deleted outright. No compat shims.
+- [x] **PR B — Engine split.** Decomposed `src/engine/forestSimulation.ts`
+      (797 LOC) into responsibility-scoped modules:
+      - `src/sim/grove/types.ts` — shared types
+        (ForestState, tree/shadow/cue/mode types).
+      - `src/sim/grove/constants.ts` — MAX_WAVES, tuning table,
+        tree positions, rune base costs, default objective.
+      - `src/sim/grove/state.ts` — initial-state + layout
+        factories.
+      - `src/sim/grove/session.ts` — mode tuning + transition +
+        run summary.
+      - `src/sim/grove/cues.ts` — ritual + spell-cadence cues
+        (+ their private helpers).
+      - `src/sim/grove/utils.ts` — clamp / round / updateThreat
+        / findWeakestTreeIndex / getShadowTargetDistance.
+      - `src/sim/runes/spells.ts` — apply / canCast / cost /
+        clear / regenerateMana.
+      - `src/sim/runes/gesture.ts` — analyzeRuneGesture
+        (circular / upward / zigzag classifier).
+      - `src/sim/corruption/shadows.ts` — spawn / advance /
+        applyHit / removePurified / intent-path / hit-damage.
+      - Barrels at `src/sim/{grove,runes,corruption}/index.ts` so
+        consumers import by domain.
+      Old `src/engine/` directory deleted outright. No compat
+      shims.
 - [x] **PR C — Seeded determinism (scaffold).** `seedrandom` +
       `createRng` + `hashSeed` + `randomSeed` shipped in
       `src/sim/rng/` (PR #9); codename codec shipped in

@@ -1,10 +1,10 @@
 import { isRuntimePaused } from "@/lib/runtimePause";
-import {
-  advanceShadowPosition,
-  type CorruptionShadow,
-  type ShadowIntentPath,
-  type TreePosition,
-} from "@/engine/forestSimulation";
+import { advanceShadowPosition } from "@/sim/corruption";
+import type {
+  CorruptionShadow,
+  ShadowIntentPath,
+  TreePosition,
+} from "@/sim/grove";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 

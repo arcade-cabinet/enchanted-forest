@@ -1,4 +1,4 @@
-import { analyzeRuneGesture } from "@/engine/forestSimulation";
+import { analyzeRuneGesture } from "@/sim/runes";
 import { forestAudio, type ToneType } from "@/lib/forestAudio";
 import { RUNE_PATTERNS, type RunePattern } from "@/lib/runePatterns";
 import { AnimatePresence, motion } from "framer-motion";

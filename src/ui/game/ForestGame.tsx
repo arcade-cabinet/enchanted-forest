@@ -4,27 +4,31 @@ import { useRunSnapshotAutosave } from "@/hooks/useRunSnapshotAutosave";
 import { recordRunResult } from "@/hooks/runtimeResult";
 import {
   applyShadowHit,
-  applySpellCast,
-  type CorruptionShadow,
-  canCastSpell,
-  clearHealing,
-  clearPurifyZone,
-  clearRuneFeedback,
-  clearShield,
+  getShadowIntentPath,
+  removePurifiedShadow,
+  spawnCorruptionWave,
+} from "@/sim/corruption";
+import {
   createInitialForestState,
+  type CorruptionShadow,
   type ForestState,
   getForestModeTuning,
   getForestRitualCue,
   getForestRunSummary,
   getForestSpellCadenceCue,
   getForestTransition,
-  getShadowIntentPath,
   MAX_WAVES,
-  regenerateMana,
-  removePurifiedShadow,
-  spawnCorruptionWave,
   TREE_POSITIONS,
-} from "@/engine/forestSimulation";
+} from "@/sim/grove";
+import {
+  applySpellCast,
+  canCastSpell,
+  clearHealing,
+  clearPurifyZone,
+  clearRuneFeedback,
+  clearShield,
+  regenerateMana,
+} from "@/sim/runes";
 import type { ForestAudioStatus } from "@/lib/forestAudio";
 import { forestAudio } from "@/lib/forestAudio";
 import type { RunePattern } from "@/lib/runePatterns";

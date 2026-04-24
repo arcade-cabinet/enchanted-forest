@@ -2,7 +2,7 @@ import {
   createGroveLayout,
   type ForestRitualCue,
   type RuneType,
-} from "@/engine/forestSimulation";
+} from "@/sim/grove";
 import { motion } from "framer-motion";
 
 const layout = createGroveLayout();
