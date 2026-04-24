@@ -164,11 +164,6 @@ export function ToneDrawer({
             pointsRef.current.map((p) => getNormalizedPosition(p)),
             spellType
           );
-          const avgX =
-            pointsRef.current.reduce((sum, p) => sum + p.x, 0) / pointsRef.current.length;
-          const avgY =
-            pointsRef.current.reduce((sum, p) => sum + p.y, 0) / pointsRef.current.length;
-          setShowSpellFeedback({ type: spellType, position: { x: avgX, y: avgY } });
           onSpellCast(spell);
         }
       }
@@ -276,6 +271,14 @@ export function ToneDrawer({
               {showSpellFeedback.type === "shield" && "♪ 守護の歌 ♪"}
               {showSpellFeedback.type === "heal" && "♪ 癒しの調べ ♪"}
               {showSpellFeedback.type === "purify" && "♪ 浄化の旋律 ♪"}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+          {showSpellFeedback.type === "purify" && "♪ 浄化の旋律 ♪"}
             </div>
           </motion.div>
         )}
