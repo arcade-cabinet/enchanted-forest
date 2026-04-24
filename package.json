@@ -37,7 +37,7 @@
     "@capacitor/status-bar": "^8.0.2",
     "@fontsource/cinzel": "^5.2.8",
     "@fontsource/inter": "^5.2.8",
-    "framer-motion": "^11.18.0",
+    "framer-motion": "^12.38.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "seedrandom": "^3.0.5",
