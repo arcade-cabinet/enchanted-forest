@@ -49,6 +49,15 @@ export function ForestGame() {
   const [isDrawing, setIsDrawing] = useState(false);
   const [spiritPos, setSpiritPos] = useState({ x: 0, y: 0 });
   const shadowIdRef = useRef(0);
+  // Track one-shot setTimeout handles from handleSpellCast so we can
+  // cancel them on unmount and on restart — otherwise repeated
+  // restarts or navigation accumulate pending state mutations that
+  // fire into stale React trees.
+  const spellTimeoutsRef = useRef<number[]>([]);
+  const clearSpellTimeouts = useCallback(() => {
+    for (const id of spellTimeoutsRef.current) window.clearTimeout(id);
+    spellTimeoutsRef.current = [];
+  }, []);
 
   const spawnWave = useCallback(
     (waveNum: number, mode: SessionMode = forestState.sessionMode) => {
@@ -90,11 +99,14 @@ export function ForestGame() {
   };
 
   // Promote tutorial → playing on first successful cast, then
-  // spawn wave 1.
+  // spawn wave 1. We flip phase="playing" INSIDE the setTimeout at
+  // the same moment the wave spawns — otherwise the transition
+  // effect below sees phase==="playing" with shadows=[] and fires a
+  // duplicate spawnWave(1), overwriting this wave's shadow IDs and
+  // double-playing playWaveStart.
   useEffect(() => {
     if (forestState.phase !== "tutorial") return;
     if (!forestState.lastRuneType) return;
-    setForestState((prev) => ({ ...prev, phase: "playing" }));
     // Small delay so the tutorial-overlay fade has time to run
     // before the first wave arrives.
     const timeout = setTimeout(() => {
@@ -103,6 +115,7 @@ export function ForestGame() {
       forestAudio.playWaveStart(1);
       setForestState((prev) => ({
         ...prev,
+        phase: "playing",
         wave: 1,
         shadows: wave.shadows,
         threatLevel: wave.shadows.length * 7,
@@ -114,9 +127,22 @@ export function ForestGame() {
 
   const restartGame = () => {
     forestAudio.stopAmbient();
+    clearSpellTimeouts();
     shadowIdRef.current = 0;
     setForestState(createInitialForestState());
   };
+
+  // Stop the ambient Tone pad and cancel any pending spell cleanup
+  // timeouts when ForestGame unmounts (e.g. Playwright navigation or
+  // HMR). Without this the Tone.Transport schedules + synth nodes
+  // accumulate across remounts, and spell-cleanup timers fire into
+  // stale React trees.
+  useEffect(() => {
+    return () => {
+      forestAudio.stopAmbient();
+      clearSpellTimeouts();
+    };
+  }, [clearSpellTimeouts]);
 
   useEffect(() => {
     if (forestState.phase !== "playing") return undefined;
@@ -145,14 +171,23 @@ export function ForestGame() {
 
     forestAudio.playSpellEffect(spell.type);
     setForestState((prev) => applySpellCast(prev, spell));
-    setTimeout(() => setForestState((prev) => clearRuneFeedback(prev)), 1000);
+
+    const track = (id: number) => {
+      spellTimeoutsRef.current.push(id);
+    };
+
+    track(
+      window.setTimeout(() => setForestState((prev) => clearRuneFeedback(prev)), 1000)
+    );
 
     if (spell.type === "shield") {
-      setTimeout(() => setForestState((prev) => clearShield(prev)), spell.duration);
+      track(window.setTimeout(() => setForestState((prev) => clearShield(prev)), spell.duration));
     } else if (spell.type === "heal") {
-      setTimeout(() => setForestState((prev) => clearHealing(prev)), 1000);
+      track(window.setTimeout(() => setForestState((prev) => clearHealing(prev)), 1000));
     } else if (spell.type === "purify") {
-      setTimeout(() => setForestState((prev) => clearPurifyZone(prev)), spell.duration);
+      track(
+        window.setTimeout(() => setForestState((prev) => clearPurifyZone(prev)), spell.duration)
+      );
     }
   };
 
