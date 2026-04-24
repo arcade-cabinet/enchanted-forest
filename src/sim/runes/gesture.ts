@@ -67,6 +67,16 @@ export function analyzeRuneGesture(points: { x: number; y: number }[]): RuneType
   const isZigzag =
     directionChanges + verticalDirectionChanges >= 2 && width > 0.2 && pathRatio > 2.4;
 
+  console.log("RUNE GESTURE DEBUG", {
+    points: points.length,
+    isCircular,
+    distanceVariance,
+    width,
+    height,
+    isUpward,
+    isZigzag,
+  });
+
   if (isCircular) return "shield";
   if (isUpward) return "heal";
   if (isZigzag) return "purify";

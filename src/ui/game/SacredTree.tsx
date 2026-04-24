@@ -84,8 +84,7 @@ export function SacredTree({
   }, [controls]);
 
   return (
-    <motion.div
-      data-testid={`tree-${id}`}
+    <div
       className="absolute flex flex-col items-center"
       style={{
         left: `${position.x}%`,
@@ -93,11 +92,15 @@ export function SacredTree({
         transform: `translate(-50%, -100%) scale(${position.canopyScale ?? 1})`,
         zIndex: 12,
       }}
-      initial={{ scale: 0, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      transition={{ type: "spring", duration: 0.55, delay: id * 0.04 }}
     >
-      {showDamage && (
+      <motion.div
+        data-testid={`tree-${id}`}
+        className="relative flex flex-col items-center"
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", duration: 0.55, delay: id * 0.04 }}
+      >
+        {showDamage && (
         <motion.div
           className="absolute -top-8 left-1/2 z-20 pointer-events-none"
           initial={{ opacity: 0, y: 0, scale: 1.5, x: "-50%" }}
@@ -381,6 +384,7 @@ export function SacredTree({
         {treeNames[id]}
       </div>
     </motion.div>
+    </div>
   );
 }
 

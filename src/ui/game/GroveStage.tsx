@@ -44,21 +44,28 @@ export function GroveStage({
       />
 
       {layout.wardRings.map((ring) => (
-        <motion.div
+        <div
           key={ring.id}
-          className="absolute rounded-full border-2"
+          className="absolute"
           style={{
             left: `${ring.x}%`,
             top: `${ring.y}%`,
             width: `${ring.width}%`,
             height: `${ring.height}%`,
-            borderColor: ring.color,
-            boxShadow: `0 0 24px ${ring.color}55`,
             transform: "translate(-50%, -50%) perspective(500px) rotateX(62deg)",
+            pointerEvents: "none",
           }}
-          animate={{ opacity: [0.26, 0.58, 0.26], scale: [0.99, 1.01, 0.99] }}
-          transition={{ duration: ring.id === "outer-ward" ? 4 : 2.8, repeat: Infinity }}
-        />
+        >
+          <motion.div
+            className="w-full h-full rounded-full border-2"
+            style={{
+              borderColor: ring.color,
+              boxShadow: `0 0 24px ${ring.color}55`,
+            }}
+            animate={{ opacity: [0.26, 0.58, 0.26], scale: [0.99, 1.01, 0.99] }}
+            transition={{ duration: ring.id === "outer-ward" ? 4 : 2.8, repeat: Infinity }}
+          />
+        </div>
       ))}
 
       <RitualFocus cue={ritualCue} showLabel={showCueLabel} />

@@ -95,14 +95,28 @@ export function ForestGame() {
   );
 
   useEffect(() => {
-    // Cheat code for e2e testing
+    // Cheat codes for e2e testing
     (window as any).__EF_CHEAT_VICTORY = () => {
       setForestState((prev) => ({ ...prev, phase: "victory", objective: "The grove is sealed." }));
     };
+    (window as any).__EF_CHEAT_TUTORIAL = () => {
+      const waveData = spawnCorruptionWave(forestState, 1, 0, forestState.sessionMode);
+      shadowIdRef.current = waveData.nextShadowId;
+      forestAudio.playWaveStart(1);
+      setForestState((prev) => ({
+        ...prev,
+        phase: "playing",
+        wave: 1,
+        shadows: waveData.shadows,
+        threatLevel: waveData.shadows.length * 7,
+        objective: "Corruption arrives. Read the cadence; defend the trees.",
+      }));
+    };
     return () => {
       delete (window as any).__EF_CHEAT_VICTORY;
+      delete (window as any).__EF_CHEAT_TUTORIAL;
     };
-  }, []);
+  }, [forestState]);
 
   const startGame = async (mode: SessionMode, saveSlot?: GameSaveSlot) => {
     // Unlock the AudioContext synchronously in the same frame as the user
