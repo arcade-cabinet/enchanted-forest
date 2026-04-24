@@ -35,6 +35,7 @@ import type { RunePattern } from "@/lib/runePatterns";
 import type { GameSaveSlot, SessionMode } from "@/lib/sessionMode";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { seedFromCodename } from "@/sim/rng";
+import { motion } from "framer-motion";
 import { CorruptionWave } from "./CorruptionWave";
 import { FireflyParticles } from "./FireflyParticles";
 import { GameUI } from "./GameUI";
@@ -43,6 +44,7 @@ import { ForestGradientBackground, NoiseBackground } from "./NoiseBackground";
 import { SacredTree } from "./SacredTree";
 import { Spirit } from "./Spirit";
 import { ToneDrawer } from "./ToneDrawer";
+import { FloatingCombatText, type FloatingTextEvent } from "./FloatingCombatText";
 
 function parseSeedParam(val: string | null): number | undefined {
   if (!val) return undefined;
@@ -62,6 +64,9 @@ export function ForestGame() {
   const [audioStatus, setAudioStatus] = useState<ForestAudioStatus>(forestAudio.getStatus());
   const [isDrawing, setIsDrawing] = useState(false);
   const [spiritPos, setSpiritPos] = useState({ x: 0, y: 0 });
+  const [lastDamageMs, setLastDamageMs] = useState(0);
+  const [floatingEvents, setFloatingEvents] = useState<FloatingTextEvent[]>([]);
+  const floatingIdRef = useRef(0);
   const shadowIdRef = useRef(0);
   // Track one-shot setTimeout handles from handleSpellCast so we can
   // cancel them on unmount and on restart — otherwise repeated
@@ -197,8 +202,31 @@ export function ForestGame() {
   const handleSpellCast = (spell: RunePattern) => {
     if (!canCastSpell(forestState, spell)) return;
 
-    forestAudio.playSpellEffect(spell.type);
-    setForestState((prev) => applySpellCast(prev, spell));
+    setForestState((prev) => {
+      const nextState = applySpellCast(prev, spell);
+      forestAudio.playSpellEffect(spell.type, nextState.harmonySurgeActive);
+      
+      let text = "";
+      let color = "";
+      if (spell.type === "shield") { text = "Shielded!"; color = "#4ade80"; }
+      else if (spell.type === "heal") { text = "Healed!"; color = "#a78bfa"; }
+      else if (spell.type === "purify") { text = "Purified!"; color = "#fbbf24"; }
+      
+      if (nextState.harmonySurgeActive) {
+        text = "SURGE: " + text;
+        color = "#f2c14e";
+      }
+
+      setFloatingEvents(e => [
+        ...e.slice(-4),
+        { id: floatingIdRef.current++, text, x: spiritPos.x / window.innerWidth * 100, y: spiritPos.y / window.innerHeight * 100, color, isSurge: nextState.harmonySurgeActive }
+      ]);
+      setTimeout(() => {
+        setFloatingEvents(e => e.slice(1));
+      }, 1200);
+
+      return nextState;
+    });
 
     const track = (id: number) => {
       spellTimeoutsRef.current.push(id);
@@ -221,6 +249,7 @@ export function ForestGame() {
 
   const handleShadowReach = (shadowId: number, treeIndex: number) => {
     forestAudio.playCorruptionThreat();
+    setLastDamageMs(Date.now());
     setForestState((prev) => applyShadowHit(prev, shadowId, treeIndex));
   };
 
@@ -280,14 +309,24 @@ export function ForestGame() {
         wave={runSummary.wave}
       />
       {showPlayfield && (
-        <>
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            x: Date.now() - lastDamageMs < 400 ? [0, -8, 8, -4, 4, 0] : 0,
+            y: Date.now() - lastDamageMs < 400 ? [0, 4, -4, 2, -2, 0] : 0,
+            boxShadow: forestState.harmonySurgeActive 
+              ? "inset 0 0 100px rgba(242, 193, 78, 0.15)" 
+              : "none",
+          }}
+          transition={{ duration: 0.4 }}
+        >
           <GroveStage
             ritualCue={ritualCue}
             threatLevel={forestState.threatLevel}
             showCueLabel={forestState.phase === "playing"}
           />
           <NoiseBackground />
-          <FireflyParticles count={40} />
+          <FireflyParticles count={forestState.harmonySurgeActive ? 80 : 40} />
 
           {forestState.trees.map((tree, index) => (
             <SacredTree
@@ -323,7 +362,8 @@ export function ForestGame() {
             disabled={forestState.phase !== "playing" && forestState.phase !== "tutorial"}
           />
           <Spirit position={spiritPos} isDrawing={isDrawing} />
-        </>
+          <FloatingCombatText events={floatingEvents} />
+        </motion.div>
       )}
 
       <GameUI
