@@ -1,5 +1,5 @@
 import { analyzeRuneGesture } from "@/sim/runes";
-import { forestAudio, type ToneType } from "@/lib/forestAudio";
+import { forestAudio } from "@/lib/forestAudio";
 import { RUNE_PATTERNS, type RunePattern } from "@/lib/runePatterns";
 import { AnimatePresence, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -33,10 +33,6 @@ export function ToneDrawer({
   const isDrawingRef = useRef(false);
   const pointsRef = useRef<{ x: number; y: number; time: number }[]>([]);
   const lastNoteTimeRef = useRef(0);
-  const [showSpellFeedback, setShowSpellFeedback] = useState<{
-    type: ToneType;
-    position: { x: number; y: number };
-  } | null>(null);
   const [visualNotes, setVisualNotes] = useState<
     { x: number; y: number; note: number; id: number }[]
   >([]);
@@ -234,54 +230,6 @@ export function ToneDrawer({
             ♪
           </motion.div>
         ))}
-      </AnimatePresence>
-      <AnimatePresence>
-        {showSpellFeedback && (
-          <motion.div
-            className="fixed pointer-events-none z-40"
-            initial={{ scale: 0.5, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 1.5, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            style={{
-              left: showSpellFeedback.position.x,
-              top: showSpellFeedback.position.y,
-              transform: "translate(-50%, -50%)",
-            }}
-          >
-            <div
-              className="px-6 py-3 rounded-lg font-bold text-2xl text-center"
-              style={{
-                background:
-                  showSpellFeedback.type === "shield"
-                    ? "linear-gradient(135deg, rgba(74, 222, 128, 0.3), rgba(74, 222, 128, 0.1))"
-                    : showSpellFeedback.type === "heal"
-                      ? "linear-gradient(135deg, rgba(167, 139, 250, 0.3), rgba(167, 139, 250, 0.1))"
-                      : "linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(251, 191, 36, 0.1))",
-                color:
-                  showSpellFeedback.type === "shield"
-                    ? "#4ade80"
-                    : showSpellFeedback.type === "heal"
-                      ? "#a78bfa"
-                      : "#fbbf24",
-                border: `2px solid ${showSpellFeedback.type === "shield" ? "#4ade80" : showSpellFeedback.type === "heal" ? "#a78bfa" : "#fbbf24"}`,
-                boxShadow: `0 0 40px ${showSpellFeedback.type === "shield" ? "rgba(74, 222, 128, 0.5)" : showSpellFeedback.type === "heal" ? "rgba(167, 139, 250, 0.5)" : "rgba(251, 191, 36, 0.5)"}`,
-              }}
-            >
-              {showSpellFeedback.type === "shield" && "♪ 守護の歌 ♪"}
-              {showSpellFeedback.type === "heal" && "♪ 癒しの調べ ♪"}
-              {showSpellFeedback.type === "purify" && "♪ 浄化の旋律 ♪"}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
-          {showSpellFeedback.type === "purify" && "♪ 浄化の旋律 ♪"}
-            </div>
-          </motion.div>
-        )}
       </AnimatePresence>
     </>
   );
