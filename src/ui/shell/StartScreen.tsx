@@ -35,6 +35,13 @@ interface StartScreenProps {
   background?: string;
   /** Class for a lightweight "display-face" override (e.g. "bs-display", "ef-display"). */
   displayClassName?: string;
+  /**
+   * Optional canvas-hero renderer. When supplied, it replaces the
+   * default `FloatingGlow` dots and the background gradient — the
+   * hero paints the entire background at production quality. Use
+   * `<LandingHero />` from the same shell barrel.
+   */
+  renderHero?: () => ReactNode;
 }
 
 const DEFAULT_VERBS: StartScreenVerb[] = [
@@ -60,6 +67,7 @@ export function StartScreen({
   glowRgb = "107, 230, 193",
   background = DEFAULT_BACKGROUND,
   displayClassName = "bs-display",
+  renderHero,
 }: StartScreenProps) {
   return (
     <motion.div
@@ -75,13 +83,20 @@ export function StartScreen({
         alignItems: "center",
         justifyContent: "center",
         padding: "2rem 1.5rem",
-        background,
+        // When a hero is supplied, it owns the background paint; the
+        // gradient-fallback layer is only used when no hero is set so
+        // tests + legacy screens still have a safe backdrop.
+        background: renderHero ? "var(--color-bg)" : background,
         color: "var(--color-fg)",
         textAlign: "center",
         pointerEvents: "none",
       }}
     >
-      <FloatingGlow count={6} color={glowColor} glowRgb={glowRgb} />
+      {renderHero ? (
+        renderHero()
+      ) : (
+        <FloatingGlow count={6} color={glowColor} glowRgb={glowRgb} />
+      )}
 
       <motion.h1
         initial={{ y: -20, opacity: 0 }}
