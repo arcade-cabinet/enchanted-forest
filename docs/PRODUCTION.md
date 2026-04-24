@@ -37,15 +37,21 @@ sequence is different from bioluminescent-sea's and cosmic-gardener's.
       responsibility-scoped modules (`src/sim/grove/*`,
       `src/sim/runes/*`, `src/sim/corruption/*`). Old module path
       deleted outright. No compat shims.
-- [ ] **PR C — Seeded determinism.** `seedrandom` + `createRng(seed)`
-      plumbed through every grove layout, corruption wave, and rune
-      note assignment. Landing shows a codename preview ("Your Next
-      Grove") in Cinzel. `?seed=<slug>` makes groves shareable.
-- [ ] **PR D — Identity-forward landing.** Animated hero replaces the
-      typographic-only card: three runes drifting in the background,
-      a sacred tree silhouette, soft cinders. Verb teaser chips
-      pre-teach the loop ("draw a rune · chain the cadence · hold the
-      grove"). Procedural blurb under the codename.
+- [x] **PR C — Seeded determinism (scaffold).** `seedrandom` +
+      `createRng` + `hashSeed` + `randomSeed` shipped in
+      `src/sim/rng/` (PR #9); codename codec shipped in
+      `src/sim/rng/codename.ts` (PR #12) with a rune-forest word
+      register (woodland geography, amulet metals, pentatonic musical
+      terms, slow-ritual vocabulary). 262,144 distinct codenames per
+      18-bit seed. Wiring the codename into the landing card +
+      `?seed=<slug>` URL is the follow-up.
+- [x] **PR D — Identity-forward landing.** Animated grove hero
+      shipped (PR #10): forest canopy + sacred tree silhouette + 32
+      fireflies + 18 rising cinders + three drifting rune glyphs
+      (shield / heal / purify) at low opacity. StartScreen gained a
+      `renderHero` slot to support the canvas. Existing verb chips
+      ("Draw a rune / Chain its cadence / Seal the grove") stayed.
+      Codename + procedural blurb are the follow-up.
 - [ ] **PR E — Audio consolidation.** Tone.js ambient pad with
       grove-specific chord voicings; pentatonic rune notes already
       present get gathered into a single audio module with master
@@ -90,8 +96,9 @@ sequence is different from bioluminescent-sea's and cosmic-gardener's.
 - [x] `cd.yml` — on push:main: deploy Pages artifact.
 - [ ] `analysis-nightly.yml` — determinism sweep once seeded
       content lands.
-- [ ] `automerge.yml` — auto-merge green dependabot PRs for
-      semver-patch + semver-minor updates.
+- [x] `automerge.yml` — auto-merge green dependabot PRs for
+      semver-patch + semver-minor updates. Shipped in PR #11; mirrors
+      the shared workflow used across the three game repos.
 
 ## Decisions that need lore/design follow-through
 
