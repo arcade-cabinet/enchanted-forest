@@ -114,9 +114,29 @@ sequence is different from bioluminescent-sea's and cosmic-gardener's.
       Adaptive-icon background updated from default white to
       `#0c1a10` so the launcher reads as the same forest identity
       as the web tabs.
-- [ ] **PR H — Production deploy.** `release.yml` tags + builds
-      Android AAB. `cd.yml` deploys web bundle to GitHub Pages.
-      `analysis-nightly.yml` runs a determinism sweep.
+- [x] **PR H — Production deploy.**
+      - `release.yml` — release-please tags + builds the Android
+        AAB (signed if `ANDROID_KEYSTORE_BASE64` is set,
+        debug-bundle otherwise). Shipped earlier.
+      - `cd.yml` — on every `push:main`, builds the web bundle
+        with `GITHUB_PAGES=true` so the Vite base resolves to
+        `/enchanted-forest/`, then deploys via
+        `actions/deploy-pages`. Shipped earlier.
+      - `analysis-nightly.yml` — cron-scheduled determinism sweep
+        at 08:30 UTC (offset from bioluminescent-sea 08:00 and
+        cosmic-gardener 08:15 so the three repos don't share
+        runner load). Runs `scripts/determinism-sweep.ts`, which
+        exercises `createInitialForestState` across all three
+        session modes, `spawnCorruptionWave` across all 8 waves,
+        `advanceShadowPosition` over 180 frames, `applySpellCast`
+        across all three rune types, a 300-tick regenerate-mana +
+        apply-shadow-hit loop, the ritual / cadence / transition
+        cues, and `analyzeRuneGesture` determinism. Asserts
+        byte-identical output across repeated calls, no
+        NaN/Infinity in any numeric field, mana + tree health +
+        threatLevel in valid ranges, and per-frame cost under
+        3ms. Opens an issue labeled `sim-regression` on failure.
+        Local run: 5ms total / 0.67ms worst frame.
 
 ## Quality gates
 
