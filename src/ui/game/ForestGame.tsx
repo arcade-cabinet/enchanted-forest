@@ -77,15 +77,40 @@ export function ForestGame() {
       return;
     }
 
-    const wave = spawnCorruptionWave(1, 0, mode);
-    shadowIdRef.current = wave.nextShadowId;
-    forestAudio.playWaveStart(1);
+    // Enter tutorial phase: trees at full health, no shadows yet,
+    // a clear instruction overlay. The first successful rune cast
+    // promotes to "playing" and spawns wave 1. This avoids the
+    // hostile "shadows already descending the instant you click
+    // START" experience.
+    shadowIdRef.current = 0;
     setForestState({
-      ...createInitialForestState("playing", mode),
-      shadows: wave.shadows,
-      threatLevel: wave.shadows.length * 7,
+      ...createInitialForestState("tutorial", mode),
+      objective: "Draw a circle anywhere to cast SHIELD.",
     });
   };
+
+  // Promote tutorial → playing on first successful cast, then
+  // spawn wave 1.
+  useEffect(() => {
+    if (forestState.phase !== "tutorial") return;
+    if (!forestState.lastRuneType) return;
+    setForestState((prev) => ({ ...prev, phase: "playing" }));
+    // Small delay so the tutorial-overlay fade has time to run
+    // before the first wave arrives.
+    const timeout = setTimeout(() => {
+      const wave = spawnCorruptionWave(1, 0, forestState.sessionMode);
+      shadowIdRef.current = wave.nextShadowId;
+      forestAudio.playWaveStart(1);
+      setForestState((prev) => ({
+        ...prev,
+        wave: 1,
+        shadows: wave.shadows,
+        threatLevel: wave.shadows.length * 7,
+        objective: "Corruption arrives. Read the cadence; defend the trees.",
+      }));
+    }, 700);
+    return () => clearTimeout(timeout);
+  }, [forestState.phase, forestState.lastRuneType, forestState.sessionMode]);
 
   const restartGame = () => {
     forestAudio.stopAmbient();
@@ -168,6 +193,12 @@ export function ForestGame() {
     build: () => forestState,
   });
 
+  // The landing ("intro") is its own screen — the live playfield
+  // must not render behind it, or trees + shadows + the drawing pad
+  // bleed through the modal. Only mount the playfield once the
+  // player is inside a run.
+  const showPlayfield = forestState.phase !== "intro";
+
   return (
     <GameViewport
       className="bg-emerald-950"
@@ -185,40 +216,46 @@ export function ForestGame() {
         totalWaves={runSummary.totalWaves}
         wave={runSummary.wave}
       />
-      <GroveStage ritualCue={ritualCue} threatLevel={forestState.threatLevel} />
-      <NoiseBackground />
-      <FireflyParticles count={40} />
+      {showPlayfield && (
+        <>
+          <GroveStage ritualCue={ritualCue} threatLevel={forestState.threatLevel} />
+          <NoiseBackground />
+          <FireflyParticles count={40} />
 
-      {forestState.trees.map((tree, index) => (
-        <SacredTree
-          key={TREE_POSITIONS[index].id}
-          id={index}
-          {...tree}
-          position={TREE_POSITIONS[index]}
-          isHealing={forestState.healingTreeIndex === index}
-          isRitualTarget={ritualCue.recommendedTreeIndex === index}
-          ritualRune={ritualCue.recommendedTreeIndex === index ? ritualCue.recommendedRune : null}
-          isTargeted={isTreeTargeted(index, forestState.shadows)}
-        />
-      ))}
+          {forestState.trees.map((tree, index) => (
+            <SacredTree
+              key={TREE_POSITIONS[index].id}
+              id={index}
+              {...tree}
+              position={TREE_POSITIONS[index]}
+              isHealing={forestState.healingTreeIndex === index}
+              isRitualTarget={ritualCue.recommendedTreeIndex === index}
+              ritualRune={
+                ritualCue.recommendedTreeIndex === index ? ritualCue.recommendedRune : null
+              }
+              isTargeted={isTreeTargeted(index, forestState.shadows)}
+            />
+          ))}
 
-      <CorruptionWave
-        shadows={forestState.shadows}
-        shadowIntents={forestState.shadows.map(getShadowIntentPath)}
-        treePositions={TREE_POSITIONS}
-        onShadowReachTree={handleShadowReach}
-        onShadowPurified={handleShadowPurified}
-        isPurifying={!!forestState.purifyZone}
-        purifyZone={forestState.purifyZone}
-      />
+          <CorruptionWave
+            shadows={forestState.shadows}
+            shadowIntents={forestState.shadows.map(getShadowIntentPath)}
+            treePositions={TREE_POSITIONS}
+            onShadowReachTree={handleShadowReach}
+            onShadowPurified={handleShadowPurified}
+            isPurifying={!!forestState.purifyZone}
+            purifyZone={forestState.purifyZone}
+          />
 
-      <ToneDrawer
-        onSpellCast={handleSpellCast}
-        onDrawingChange={setIsDrawing}
-        onPositionChange={setSpiritPos}
-        disabled={forestState.phase !== "playing"}
-      />
-      <Spirit position={spiritPos} isDrawing={isDrawing} />
+          <ToneDrawer
+            onSpellCast={handleSpellCast}
+            onDrawingChange={setIsDrawing}
+            onPositionChange={setSpiritPos}
+            disabled={forestState.phase !== "playing" && forestState.phase !== "tutorial"}
+          />
+          <Spirit position={spiritPos} isDrawing={isDrawing} />
+        </>
+      )}
 
       <GameUI
         wave={forestState.wave}

@@ -36,15 +36,15 @@ export function OverlayButton({
   const variantStyle: CSSProperties =
     variant === "primary"
       ? {
-          background: "var(--color-glow)",
+          background: "var(--color-firefly)",
           color: "var(--color-bg)",
-          border: "1px solid var(--color-glow)",
-          boxShadow: "0 0 20px rgba(107, 230, 193, 0.35)",
+          border: "1px solid var(--color-firefly)",
+          boxShadow: "0 0 20px rgba(242, 193, 78, 0.35)",
         }
       : {
           background: "transparent",
           color: "var(--color-fg)",
-          border: "1px solid rgba(217, 242, 236, 0.25)",
+          border: "1px solid rgba(236, 241, 223, 0.25)",
         };
 
   return (

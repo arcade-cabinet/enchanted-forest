@@ -12,11 +12,6 @@ interface ToneDrawerProps {
 }
 
 const SCALE_NOTES = ["C", "D", "E", "G", "A", "C", "D", "E"];
-const SCALE_NOTE_STEPS = SCALE_NOTES.map((note, index) => ({
-  id: `scale-note-${index + 1}-${note}`,
-  note,
-  index,
-}));
 const NOTE_COLORS = [
   "rgba(239, 68, 68, 0.6)",
   "rgba(249, 115, 22, 0.6)",
@@ -38,7 +33,6 @@ export function ToneDrawer({
   const isDrawingRef = useRef(false);
   const pointsRef = useRef<{ x: number; y: number; time: number }[]>([]);
   const lastNoteTimeRef = useRef(0);
-  const [activeNote, setActiveNote] = useState<number | null>(null);
   const [showSpellFeedback, setShowSpellFeedback] = useState<{
     type: ToneType;
     position: { x: number; y: number };
@@ -77,13 +71,11 @@ export function ToneDrawer({
     const normalizedY = y / canvas.height;
     const noteIndex = Math.floor((1 - normalizedY) * SCALE_NOTES.length);
     const clampedIndex = Math.max(0, Math.min(noteIndex, SCALE_NOTES.length - 1));
-    setActiveNote(clampedIndex);
     forestAudio.playTouchNote(x / canvas.width, normalizedY);
     setVisualNotes((prev) => [
       ...prev.slice(-20),
       { x, y, note: clampedIndex, id: noteIdRef.current++ },
     ]);
-    setTimeout(() => setActiveNote(null), 100);
   }, []);
 
   const drawTrail = useCallback(
@@ -223,35 +215,11 @@ export function ToneDrawer({
           pointerEvents: disabled ? "none" : "auto",
         }}
       />
-      <div className="fixed left-3 top-1/2 z-40 -translate-y-1/2 pointer-events-none sm:left-4">
-        <div className="flex flex-col-reverse gap-1.5 sm:gap-1">
-          {SCALE_NOTE_STEPS.map(({ id, note, index }) => (
-            <motion.div
-              key={id}
-              className="flex items-center gap-2"
-              animate={{
-                scale: activeNote === index ? 1.2 : 1,
-                opacity: activeNote === index ? 1 : 0.5,
-              }}
-              transition={{ duration: 0.1 }}
-            >
-              <div
-                className="flex h-8 w-10 items-center justify-center rounded text-sm font-bold text-white sm:h-6 sm:w-8 sm:text-xs"
-                style={{
-                  background: NOTE_COLORS[index],
-                  border:
-                    activeNote === index
-                      ? "1px solid rgba(255,255,255,0.8)"
-                      : "1px solid rgba(255,255,255,0.22)",
-                  boxShadow: activeNote === index ? `0 0 22px ${NOTE_COLORS[index]}` : "none",
-                }}
-              >
-                {note}
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
+      {/* Pentatonic note-column was pulled — during play, player
+          can't read "drawing this shape hits these notes" in the
+          heat of it, and the column competed with the top cue
+          strip for the left edge. The audio still plays notes as
+          the cursor moves; we just don't pop a visible column. */}
       <AnimatePresence>
         {visualNotes.map((vn) => (
           <motion.div

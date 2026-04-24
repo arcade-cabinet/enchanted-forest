@@ -388,14 +388,6 @@ function CorruptionShadowEntity({
           />
         ))}
       </motion.div>
-      <motion.div
-        className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] text-purple-300/70 font-bold whitespace-nowrap"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        闇の影
-      </motion.div>
     </motion.div>
   );
 }
