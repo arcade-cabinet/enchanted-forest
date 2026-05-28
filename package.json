@@ -52,7 +52,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.15",
+    "@biomejs/biome": "^2.4.16",
     "@capacitor/cli": "^8.3.4",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/vite": "^4.3.0",
